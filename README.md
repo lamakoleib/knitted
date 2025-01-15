@@ -28,7 +28,7 @@ user-friendly and accessible alternative to existing platforms, allowing users t
 
 ---
 
-# Techstack
+### Techstack
 - Auth/Database: [Supabase](https://supabase.com/)
 - Frontend/Backend: [Nextjs](https://nextjs.org/) 
 - Broker: [RabbitMQ](https://www.rabbitmq.com/) 
