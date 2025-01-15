@@ -2,15 +2,15 @@
 import { createClient } from "@/utils/supabase/server";
 import { type Tables } from "@/types/database.types";
 
-export async function getUserByID(id: number): Promise<Tables<"Users">> {
+export async function getUserByID(id: number): Promise<Tables<"Profiles">> {
 	const supabase = await createClient();
 	const { data, error } = await supabase
-		.from("Users")
+		.from("Profiles")
 		.select("*")
 		.eq("id", id)
-		.returns<Tables<"Users">>();
+		.returns<Tables<"Profiles">>();
 	if (error) throw error;
-	const user: Tables<"Users"> = data!;
+	const user: Tables<"Profiles"> = data!;
 	return user;
 }
 
