@@ -14,14 +14,16 @@ export async function updateSession(request: NextRequest) {
 				getAll() {
 					return request.cookies.getAll();
 				},
-				setAll(cookiesToSet) {
-					cookiesToSet.forEach(({ name, value, options }) =>
+				//eslint-disable-next-line @typescript-eslint/no-explicit-any
+				setAll(cookiesToSet: any) {
+					cookiesToSet.forEach(({ name, value, options }: any) =>
 						request.cookies.set(name, value)
 					);
 					supabaseResponse = NextResponse.next({
 						request,
 					});
-					cookiesToSet.forEach(({ name, value, options }) =>
+					//eslint-disable-next-line @typescript-eslint/no-explicit-any
+					cookiesToSet.forEach(({ name, value, options }: any) =>
 						supabaseResponse.cookies.set(name, value, options)
 					);
 				},
@@ -36,7 +38,7 @@ export async function updateSession(request: NextRequest) {
 	if (
 		!user &&
 		!request.nextUrl.pathname.startsWith("/login") &&
-		!request.nextUrl.pathname.startsWith("/auth")
+		!request.nextUrl.pathname.startsWith("/signup")
 	) {
 		// no user, potentially respond by redirecting the user to the login page
 		const url = request.nextUrl.clone();
