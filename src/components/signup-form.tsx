@@ -2,6 +2,8 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import Link from "next/link";
+import { signup } from "@/lib/auth-actions";
 
 export default function SignupForm({
 	className,
@@ -13,19 +15,6 @@ export default function SignupForm({
 				<h1 className="text-2xl font-bold">Create a new account</h1>
 			</div>
 			<div className="grid gap-6">
-				<div className="grid gap-2">
-					<Label htmlFor="email">Email</Label>
-					<Input
-						id="email"
-						type="email"
-						placeholder="email@example.com"
-						required
-					/>
-				</div>
-				<div className="grid gap-2">
-					<Label htmlFor="username">Username</Label>
-					<Input id="username" type="text" required />
-				</div>
 				<div className="grid grid-cols-2 gap-2">
 					<span>
 						<Label htmlFor="firstname">First Name</Label>
@@ -37,6 +26,15 @@ export default function SignupForm({
 					</span>
 				</div>
 				<div className="grid gap-2">
+					<Label htmlFor="email">Email</Label>
+					<Input
+						id="email"
+						type="email"
+						placeholder="email@example.com"
+						required
+					/>
+				</div>
+				<div className="grid gap-2">
 					<Label htmlFor="password">Password</Label>
 					<Input id="password" type="password" required />
 				</div>
@@ -44,7 +42,7 @@ export default function SignupForm({
 					<Label htmlFor="confirm-password">Confirm Password</Label>
 					<Input id="confirm-password" type="password" required />
 				</div>
-				<Button type="submit" className="w-full bg-red-300">
+				<Button type="submit" className="w-full bg-red-300" formAction={signup}>
 					Signup
 				</Button>
 				<div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
@@ -61,6 +59,12 @@ export default function SignupForm({
 					</svg>
 					Login with Google
 				</Button>
+				<div className="text-center text-sm">
+					Already have an account?{" "}
+					<Link href="/login" className="underline underline-offset-4">
+						Login
+					</Link>
+				</div>
 			</div>
 		</form>
 	);
