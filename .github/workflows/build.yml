@@ -1,9 +1,8 @@
 name: Build Workflow
 # Trigger this workflow on PRs
 on:
-  push:
-    pull_request:
-      - types: [opened, reopened]
+  pull_request:
+    types: [opened, reopened]
 
 jobs:
   deploy:
