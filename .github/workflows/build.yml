@@ -1,6 +1,5 @@
 name: Build Workflow
-
-# Trigger this workflow on pushes to the specified branch
+# Trigger this workflow on PRs
 on:
   push:
     pull_request:
