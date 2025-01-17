@@ -6,7 +6,7 @@
 | ---------------- | --------------- | ------------------- |
 | Brianna Bouassali| 300234354        | bboua059@uottawa.ca  |
 | Lama Koleib      | 300259290        | lkole095@uottawa.ca  |
-| Zeynep Sevinc    | 300217661        | zsevi066@uottawa.ca  |
+| Zeynep Sevincel    | 300217661        | zsevi066@uottawa.ca  |
 
 ---
 
