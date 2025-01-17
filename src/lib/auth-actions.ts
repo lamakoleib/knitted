@@ -15,14 +15,16 @@ export async function login(formData: FormData) {
 		password: formData.get("password") as string,
 	};
 
+	console.log(data);
 	const { error } = await supabase.auth.signInWithPassword(data);
+	console.log(error);
 
 	if (error) {
 		redirect("/error");
 	}
 
 	revalidatePath("/", "layout");
-	redirect("/");
+	redirect("/home");
 }
 
 export async function signup(formData: FormData) {
@@ -50,7 +52,7 @@ export async function signup(formData: FormData) {
 	}
 
 	revalidatePath("/", "layout");
-	redirect("/");
+	redirect("/home");
 }
 
 export async function signout() {
@@ -61,7 +63,7 @@ export async function signout() {
 		redirect("/error");
 	}
 
-	redirect("/logout");
+	redirect("/login");
 }
 
 export async function signInWithGoogle() {
