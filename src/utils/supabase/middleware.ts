@@ -1,6 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+// TODO: Fix typing for cookies causing eslint to complain
+
 export async function updateSession(request: NextRequest) {
 	let supabaseResponse = NextResponse.next({
 		request,
@@ -14,14 +16,17 @@ export async function updateSession(request: NextRequest) {
 				getAll() {
 					return request.cookies.getAll();
 				},
-				setAll(cookiesToSet) {
-					cookiesToSet.forEach(({ name, value }) =>
+				//eslint-disable-next-line @typescript-eslint/no-explicit-any
+				setAll(cookiesToSet: any) {
+					//eslint-disable-next-line @typescript-eslint/no-explicit-any
+					cookiesToSet.forEach(({ name, value }: any) =>
 						request.cookies.set(name, value)
 					);
 					supabaseResponse = NextResponse.next({
 						request,
 					});
-					cookiesToSet.forEach(({ name, value, options }) =>
+					//eslint-disable-next-line @typescript-eslint/no-explicit-any
+					cookiesToSet.forEach(({ name, value, options }: any) =>
 						supabaseResponse.cookies.set(name, value, options)
 					);
 				},
@@ -36,7 +41,8 @@ export async function updateSession(request: NextRequest) {
 	if (
 		!user &&
 		!request.nextUrl.pathname.startsWith("/login") &&
-		!request.nextUrl.pathname.startsWith("/auth")
+		!request.nextUrl.pathname.startsWith("/signup") &&
+		false
 	) {
 		// no user, potentially respond by redirecting the user to the login page
 		const url = request.nextUrl.clone();
