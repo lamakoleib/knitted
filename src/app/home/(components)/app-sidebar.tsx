@@ -3,15 +3,9 @@
 import * as React from "react";
 import {
 	AudioWaveform,
-	BookOpen,
-	Bot,
-	Command,
 	Frame,
-	GalleryVerticalEnd,
 	Map,
 	Search,
-	Settings2,
-	SquareTerminal,
 	Volleyball,
 	Rss,
 } from "lucide-react";
