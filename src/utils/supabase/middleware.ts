@@ -1,6 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+// TODO: Fix typing for cookies causing eslint to complain
+
 export async function updateSession(request: NextRequest) {
 	let supabaseResponse = NextResponse.next({
 		request,
@@ -16,7 +18,8 @@ export async function updateSession(request: NextRequest) {
 				},
 				//eslint-disable-next-line @typescript-eslint/no-explicit-any
 				setAll(cookiesToSet: any) {
-					cookiesToSet.forEach(({ name, value, options }: any) =>
+					//eslint-disable-next-line @typescript-eslint/no-explicit-any
+					cookiesToSet.forEach(({ name, value }: any) =>
 						request.cookies.set(name, value)
 					);
 					supabaseResponse = NextResponse.next({
