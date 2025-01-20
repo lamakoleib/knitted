@@ -3,7 +3,7 @@ import {
 	SidebarTrigger,
 	SidebarInset,
 } from "@/components/ui/sidebar";
-import { AppSidebar } from "./(components)/app-sidebar";
+import { AppSidebar } from "./components/app-sidebar";
 import {
 	Breadcrumb,
 	BreadcrumbItem,
