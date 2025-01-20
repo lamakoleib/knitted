@@ -2,7 +2,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { type Tables } from "@/types/database.types";
 
-export async function getUserByID(id: number): Promise<Tables<"Profiles">> {
+export async function getProfileByID(id: number): Promise<Tables<"Profiles">> {
 	const supabase = await createClient();
 	const { data, error } = await supabase
 		.from("Profiles")
