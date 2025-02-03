@@ -11,7 +11,7 @@ describe("db-actions", () => {
       select: jest.fn(() => ({
         eq: jest.fn(() => ({
           returns: jest.fn(() => ({
-            data: [{ id: 1, name: "Iron Man" }],
+            data: [],
             error: null,
           })),
         })),
@@ -25,19 +25,49 @@ describe("db-actions", () => {
   });
 
   it("fetches a user by ID", async () => {
-    const user = await dbActions.getUserByID(1);
+    const mockUser = {
+      user_id: "1",
+      first_name: "Tony",
+      last_name: "Stark",
+      username: "ironman",
+      bio: "Genius, billionaire, hero",
+      follower_count: 10,
+      following_count: 5,
+    };
 
-    expect(createClient).toHaveBeenCalled();
-    expect(mockSupabaseClient.from).toHaveBeenCalledWith("Profiles");
-    expect(user).toEqual([{ id: 1, name: "Iron Man" }]);
-  });
-
-  it("fetches a project by ID", async () => {
     (mockSupabaseClient.from as jest.Mock).mockReturnValueOnce({
       select: jest.fn(() => ({
         eq: jest.fn(() => ({
           returns: jest.fn(() => ({
-            data: [{ id: 1, name: "Test Project" }],
+            data: [mockUser],
+            error: null,
+          })),
+        })),
+      })),
+    });
+
+    const user = await dbActions.getUserByID(1);
+
+    expect(createClient).toHaveBeenCalled();
+    expect(mockSupabaseClient.from).toHaveBeenCalledWith("Profiles");
+    expect(user).toEqual([mockUser]);
+  });
+
+  it("fetches a project by ID", async () => {
+    const mockProject = {
+      project_id: 1,
+      user_id: "1",
+      pattern_id: null,
+      created_at: "2025-01-01T12:00:00Z",
+      yarn_list: null,
+      yarrn_id: null,
+    };
+
+    (mockSupabaseClient.from as jest.Mock).mockReturnValueOnce({
+      select: jest.fn(() => ({
+        eq: jest.fn(() => ({
+          returns: jest.fn(() => ({
+            data: [mockProject],
             error: null,
           })),
         })),
@@ -48,15 +78,23 @@ describe("db-actions", () => {
 
     expect(createClient).toHaveBeenCalled();
     expect(mockSupabaseClient.from).toHaveBeenCalledWith("Project");
-    expect(project).toEqual([{ id: 1, name: "Test Project" }]);
+    expect(project).toEqual([mockProject]);
   });
 
   it("fetches a pattern by ID", async () => {
+    const mockPattern = {
+      pattern_id: 1,
+      pattern_name: "Classic Pattern",
+      author_name: "Natasha Romanoff",
+      project_id: null,
+      yarn_id: null,
+    };
+
     (mockSupabaseClient.from as jest.Mock).mockReturnValueOnce({
       select: jest.fn(() => ({
         eq: jest.fn(() => ({
           returns: jest.fn(() => ({
-            data: [{ id: 1, name: "Pattern 1" }],
+            data: [mockPattern],
             error: null,
           })),
         })),
@@ -67,15 +105,22 @@ describe("db-actions", () => {
 
     expect(createClient).toHaveBeenCalled();
     expect(mockSupabaseClient.from).toHaveBeenCalledWith("Patterns");
-    expect(pattern).toEqual([{ id: 1, name: "Pattern 1" }]);
+    expect(pattern).toEqual([mockPattern]);
   });
 
   it("fetches comments by project ID", async () => {
+    const mockComment = {
+      comment_id: 1,
+      project_id: 1,
+      user_id: "user_123",
+      created_at: "2025-01-01T12:00:00Z",
+    };
+
     (mockSupabaseClient.from as jest.Mock).mockReturnValueOnce({
       select: jest.fn(() => ({
         eq: jest.fn(() => ({
           returns: jest.fn(() => ({
-            data: [{ id: 1, content: "Great project!" }],
+            data: [mockComment],
             error: null,
           })),
         })),
@@ -86,15 +131,20 @@ describe("db-actions", () => {
 
     expect(createClient).toHaveBeenCalled();
     expect(mockSupabaseClient.from).toHaveBeenCalledWith("Comments");
-    expect(comments).toEqual([{ id: 1, content: "Great project!" }]);
+    expect(comments).toEqual([mockComment]);
   });
 
   it("fetches followers by user ID", async () => {
+    const mockFollower = {
+      followers_id: "follower_1",
+      user_id: "1",
+    };
+
     (mockSupabaseClient.from as jest.Mock).mockReturnValueOnce({
       select: jest.fn(() => ({
         eq: jest.fn(() => ({
           returns: jest.fn(() => ({
-            data: [{ id: 1, follower_id: "user_123" }],
+            data: [mockFollower],
             error: null,
           })),
         })),
@@ -105,7 +155,7 @@ describe("db-actions", () => {
 
     expect(createClient).toHaveBeenCalled();
     expect(mockSupabaseClient.from).toHaveBeenCalledWith("Followers");
-    expect(followers).toEqual([{ id: 1, follower_id: "user_123" }]);
+    expect(followers).toEqual([mockFollower]);
   });
 
   it("throws an error if the query fails", async () => {
