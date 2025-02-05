@@ -49,7 +49,8 @@ if (
     return NextResponse.redirect(url);
   }
   //If the user is authenticated and tries to access /login or /signup, redirect them to /home
-  if (user && (request.nextUrl.pathname.startsWith("/login") || request.nextUrl.pathname.startsWith("/signup"))) {
+  if (user && (request.nextUrl.pathname.startsWith("/login") || request.nextUrl.pathname.startsWith("/signup")||
+  request.nextUrl.pathname === "/")) {
     const url = request.nextUrl.clone();
     url.pathname = "/home";
     return NextResponse.redirect(url);
