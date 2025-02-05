@@ -54,6 +54,21 @@ export async function signup(formData: FormData) {
 	revalidatePath("/", "layout");
 	redirect("/home");
 }
+// TODO: Add typing for the user object, should return Promise<Union:...:> type?
+// Preferebly, we should use the type for profile from database.types, so we need to
+// change this to getProfileByID and make use of the auth users ID to get the profile
+// But profiles table has not been fully implemented.
+export async function getCurrentUser() {
+	const supabase = await createClient();
+	const { data, error } = await supabase.auth.getUser();
+
+	if (error) {
+		console.log(error);
+		redirect("/error");
+	}
+
+	return data;
+}
 
 export async function signout() {
 	const supabase = await createClient();
