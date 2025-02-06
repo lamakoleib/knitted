@@ -6,7 +6,7 @@
 | ---------------- | --------------- | ------------------- |
 | Brianna Bouassali| 300234354        | bboua059@uottawa.ca  |
 | Lama Koleib      | 300259290        | lkole095@uottawa.ca  |
-| Zeynep Sevinc    | 300217661        | zsevi066@uottawa.ca  |
+| Zeynep Sevincel    | 300217661        | zsevi066@uottawa.ca  |
 
 ---
 
@@ -31,6 +31,6 @@ user-friendly and accessible alternative to existing platforms, allowing users t
 ### Techstack
 - Auth/Database: [Supabase](https://supabase.com/)
 - Frontend/Backend: [Nextjs](https://nextjs.org/) 
-- Broker: [RabbitMQ](https://www.rabbitmq.com/) 
+- Broker: [PGMQ](https://tembo.io/pgmq/)
 - Deployment: [Vercel](https://vercel.com/)
 - UI Components: [Shadcn](https://ui.shadcn.com/docs)

@@ -21,15 +21,10 @@ import {
 } from "@/components/ui/sidebar";
 import Link from "next/link";
 
-export function NavUser({
-	user,
-}: {
-	user: {
-		name: string;
-		email: string;
-		avatar: string;
-	};
-}) {
+// TODO: Fix typing
+// See todo in auth-actions.ts
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function NavUser({ user }: { user: any }) {
 	const { isMobile } = useSidebar();
 
 	return (
@@ -43,10 +38,17 @@ export function NavUser({
 						>
 							<Avatar className="h-8 w-8 rounded-lg">
 								<AvatarImage src={user.avatar} alt={user.name} />
-								<AvatarFallback className="rounded-lg">CN</AvatarFallback>
+								<AvatarFallback className="rounded-lg">
+									{user?.user_metadata?.full_name
+										.split(" ")
+										.map((name: string) => name.charAt(0))
+										.join("")}
+								</AvatarFallback>
 							</Avatar>
 							<div className="grid flex-1 text-left text-sm leading-tight">
-								<span className="truncate font-semibold">{user.name}</span>
+								<span className="truncate font-semibold">
+									{user.user_metadata.full_name}
+								</span>
 								<span className="truncate text-xs">{user.email}</span>
 							</div>
 							<ChevronsUpDown className="ml-auto size-4" />
@@ -62,10 +64,17 @@ export function NavUser({
 							<div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
 								<Avatar className="h-8 w-8 rounded-lg">
 									<AvatarImage src={user.avatar} alt={user.name} />
-									<AvatarFallback className="rounded-lg">CN</AvatarFallback>
+									<AvatarFallback className="rounded-lg">
+										{user?.user_metadata?.full_name
+											.split(" ")
+											.map((name: string) => name.charAt(0))
+											.join("")}
+									</AvatarFallback>
 								</Avatar>
 								<div className="grid flex-1 text-left text-sm leading-tight">
-									<span className="truncate font-semibold">{user.name}</span>
+									<span className="truncate font-semibold">
+										{user.user_metadata.full_name}
+									</span>
 									<span className="truncate text-xs">{user.email}</span>
 								</div>
 							</div>

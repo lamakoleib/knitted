@@ -13,8 +13,11 @@ import {
 	BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
-
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default async function Layout({
+	children,
+}: {
+	children: React.ReactNode;
+}) {
 	return (
 		<SidebarProvider>
 			<AppSidebar />

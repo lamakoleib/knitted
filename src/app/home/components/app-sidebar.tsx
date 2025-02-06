@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import {
 	AudioWaveform,
@@ -23,6 +21,7 @@ import {
 	SidebarGroup,
 	SidebarGroupLabel,
 } from "@/components/ui/sidebar";
+import { getCurrentUser } from "@/lib/auth-actions";
 
 const data = {
 	user: {
@@ -59,7 +58,10 @@ const data = {
 	],
 };
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export async function AppSidebar({
+	...props
+}: React.ComponentProps<typeof Sidebar>) {
+	const user = await getCurrentUser();
 	return (
 		<Sidebar collapsible="icon" {...props}>
 			<SidebarHeader>
@@ -96,7 +98,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				</SidebarGroup>
 			</SidebarContent>
 			<SidebarFooter>
-				<NavUser user={data.user} />
+				<NavUser user={user.user} />
 			</SidebarFooter>
 			<SidebarRail />
 		</Sidebar>
