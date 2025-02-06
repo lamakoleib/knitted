@@ -1,4 +1,4 @@
-import type { Config } from "tailwindcss";
+import type { Config } from "tailwindcss"
 
 export default {
 	darkMode: ["class"],
@@ -9,6 +9,9 @@ export default {
 	],
 	theme: {
 		extend: {
+			transitionDelay: {
+				"2000": "2000ms",
+			},
 			aspectRatio: {
 				"4/3": "4 / 3",
 				"3/4": "3 / 4",
@@ -76,4 +79,4 @@ export default {
 		},
 	},
 	plugins: [require("tailwindcss-animate")],
-} satisfies Config;
+} satisfies Config
