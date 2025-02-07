@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
 
 export default function ProjectDetailsPage() {
   const [projectImage, setProjectImage] = useState<string | null>(null);
@@ -35,38 +34,36 @@ export default function ProjectDetailsPage() {
   };
 
   return (
-    <Card className="max-w-6xl mx-auto mt-10 shadow-lg p-8">
-      <div className="grid grid-cols-2 gap-6">
+    <div className="min-h-screen bg-gray-50 p-12">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-10">
         {/* Project Image */}
-        <CardHeader>
-          <div className="relative border-dashed border-2 border-gray-300 rounded-lg h-[300px]">
-            {projectImage ? (
-              <Image
-                src={projectImage}
-                alt="Project"
-                layout="fill"
-                objectFit="cover"
-                className="rounded-lg"
+        <div className="relative border-dashed border-2 border-gray-300 rounded-lg h-[480px] flex items-center justify-center">
+          {projectImage ? (
+            <Image
+              src={projectImage}
+              alt="Project"
+              layout="fill"
+              objectFit="cover"
+              className="rounded-lg"
+            />
+          ) : (
+            <label
+              htmlFor="image-upload"
+              className="text-gray-500 cursor-pointer"
+            >
+              Click to upload project image
+              <input
+                type="file"
+                id="image-upload"
+                className="hidden"
+                onChange={handleImageChange}
               />
-            ) : (
-              <label
-                htmlFor="image-upload"
-                className="flex items-center justify-center h-full text-gray-500 cursor-pointer"
-              >
-                Click to upload project image
-                <input
-                  type="file"
-                  id="image-upload"
-                  className="hidden"
-                  onChange={handleImageChange}
-                />
-              </label>
-            )}
-          </div>
-        </CardHeader>
+            </label>
+          )}
+        </div>
 
         {/* Project Details */}
-        <CardContent>
+        <div>
           {/* Project Title */}
           <input
             type="text"
@@ -74,68 +71,30 @@ export default function ProjectDetailsPage() {
             value={formData.title}
             onChange={handleInputChange}
             placeholder="Enter project title"
-            className="w-full text-3xl font-bold mb-4 border-b-2 focus:outline-none p-1"
+            className="w-full text-3xl font-bold mb-4 border-b-2 focus:outline-none p-2"
           />
 
           <p className="text-lg text-gray-500 mb-4">Project Information</p>
-
           <div className="grid grid-cols-2 gap-4">
-            <input
-              type="text"
-              name="pattern"
-              value={formData.pattern}
-              onChange={handleInputChange}
-              placeholder="Pattern"
-              className="border rounded-lg p-2"
-            />
-            <input
-              type="text"
-              name="category"
-              value={formData.category}
-              onChange={handleInputChange}
-              placeholder="Category"
-              className="border rounded-lg p-2"
-            />
-            <input
-              type="text"
-              name="size"
-              value={formData.size}
-              onChange={handleInputChange}
-              placeholder="Size"
-              className="border rounded-lg p-2"
-            />
-            <input
-              type="text"
-              name="needles"
-              value={formData.needles}
-              onChange={handleInputChange}
-              placeholder="Needles / Hooks"
-              className="border rounded-lg p-2"
-            />
-            <input
-              type="text"
-              name="yarn"
-              value={formData.yarn}
-              onChange={handleInputChange}
-              placeholder="Yarn"
-              className="border rounded-lg p-2"
-            />
-            <input
-              type="text"
-              name="yardage"
-              value={formData.yardage}
-              onChange={handleInputChange}
-              placeholder="Yardage"
-              className="border rounded-lg p-2"
-            />
-            <input
-              type="text"
-              name="colourway"
-              value={formData.colourway}
-              onChange={handleInputChange}
-              placeholder="Colourway"
-              className="border rounded-lg p-2"
-            />
+            {[
+              ["pattern", "Pattern"],
+              ["category", "Category"],
+              ["size", "Size"],
+              ["needles", "Needles / Hooks"],
+              ["yarn", "Yarn"],
+              ["yardage", "Yardage"],
+              ["colourway", "Colourway"],
+            ].map(([name, placeholder], idx) => (
+              <input
+                key={idx}
+                type="text"
+                name={name}
+                value={formData[name as keyof typeof formData]}
+                onChange={handleInputChange}
+                placeholder={placeholder}
+                className="border rounded-lg p-2"
+              />
+            ))}
           </div>
 
           {/* Project Status */}
@@ -149,10 +108,11 @@ export default function ProjectDetailsPage() {
               placeholder="Status (e.g., Finished)"
               className="border rounded-lg p-2"
             />
-
-            {/* Date inputs */}
+            {/* Date Inputs */}
             <div>
-              <label className="block text-sm text-gray-600 mb-1">Start Date</label>
+              <label className="block text-sm text-gray-600 mb-1">
+                Start Date
+              </label>
               <input
                 type="date"
                 name="started"
@@ -162,7 +122,9 @@ export default function ProjectDetailsPage() {
               />
             </div>
             <div>
-              <label className="block text-sm text-gray-600 mb-1">Completion Date</label>
+              <label className="block text-sm text-gray-600 mb-1">
+                Completion Date
+              </label>
               <input
                 type="date"
                 name="finished"
@@ -180,8 +142,8 @@ export default function ProjectDetailsPage() {
           >
             Save Project
           </button>
-        </CardContent>
+        </div>
       </div>
-    </Card>
+    </div>
   );
 }
