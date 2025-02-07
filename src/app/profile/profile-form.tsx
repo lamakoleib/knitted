@@ -1,12 +1,12 @@
-"use client";
+"use client"
 
-import Link from "next/link";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+import Link from "next/link"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
 
-import { toast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
+import { toast } from "@/hooks/use-toast"
+import { Button } from "@/components/ui/button"
 import {
 	Form,
 	FormControl,
@@ -15,16 +15,16 @@ import {
 	FormItem,
 	FormLabel,
 	FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
 import {
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
+} from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
 const profileFormSchema = z.object({
 	username: z
 		.string()
@@ -47,9 +47,9 @@ const profileFormSchema = z.object({
 			})
 		)
 		.optional(),
-});
+})
 
-type ProfileFormValues = z.infer<typeof profileFormSchema>;
+type ProfileFormValues = z.infer<typeof profileFormSchema>
 
 // This can come from your database or API.
 const defaultValues: Partial<ProfileFormValues> = {
@@ -58,14 +58,14 @@ const defaultValues: Partial<ProfileFormValues> = {
 		{ value: "https://shadcn.com" },
 		{ value: "http://twitter.com/shadcn" },
 	],
-};
+}
 
 export function ProfileForm() {
 	const form = useForm<ProfileFormValues>({
 		resolver: zodResolver(profileFormSchema),
 		defaultValues,
 		mode: "onChange",
-	});
+	})
 
 	function onSubmit(data: ProfileFormValues) {
 		toast({
@@ -75,7 +75,7 @@ export function ProfileForm() {
 					<code className="text-white">{JSON.stringify(data, null, 2)}</code>
 				</pre>
 			),
-		});
+		})
 	}
 
 	return (
@@ -104,7 +104,10 @@ export function ProfileForm() {
 					render={({ field }) => (
 						<FormItem>
 							<FormLabel>Email</FormLabel>
-							<Select onValueChange={field.onChange} defaultValue={field.value}>
+							<Select
+								onValueChange={field.onChange}
+								defaultValue={field.value}
+							>
 								<FormControl>
 									<SelectTrigger>
 										<SelectValue placeholder="Select a verified email to display" />
@@ -148,5 +151,5 @@ export function ProfileForm() {
 				<Button type="submit">Update profile</Button>
 			</form>
 		</Form>
-	);
+	)
 }
