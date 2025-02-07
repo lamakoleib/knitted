@@ -33,6 +33,24 @@ export default function ProjectDetailsPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // Handles form reset on cancel
+  const handleCancel = () => {
+    setFormData({
+      title: "",
+      pattern: "",
+      category: "",
+      size: "",
+      needles: "",
+      yarn: "",
+      yardage: "",
+      colourway: "",
+      status: "",
+      started: "",
+      finished: "",
+    });
+    setProjectImage(null);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 p-12">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-10">
@@ -64,7 +82,6 @@ export default function ProjectDetailsPage() {
 
         {/* Project Details */}
         <div>
-          {/* Project Title */}
           <input
             type="text"
             name="title"
@@ -92,56 +109,66 @@ export default function ProjectDetailsPage() {
                 value={formData[name as keyof typeof formData]}
                 onChange={handleInputChange}
                 placeholder={placeholder}
-                className="border rounded-lg p-2"
+                className="border rounded-lg p-2 w-full h-12"
               />
             ))}
           </div>
 
           {/* Project Status */}
-          <p className="text-lg text-gray-500 mt-6">Project Status</p>
+          <p className="text-lg text-gray-500 mt-6 mb-3">Project Status</p>
           <div className="grid grid-cols-2 gap-4">
-            <input
-              type="text"
-              name="status"
-              value={formData.status}
-              onChange={handleInputChange}
-              placeholder="Status (e.g., Finished)"
-              className="border rounded-lg p-2"
-            />
-            {/* Date Inputs */}
-            <div>
-              <label className="block text-sm text-gray-600 mb-1">
-                Start Date
-              </label>
+            <div className="w-full">
+              <label className="block text-sm text-gray-600 mb-1">Status</label>
+              <input
+                type="text"
+                name="status"
+                value={formData.status}
+                onChange={handleInputChange}
+                placeholder="Status (e.g., Finished)"
+                className="border rounded-lg p-2 w-full h-12"
+              />
+            </div>
+
+            <div className="w-full">
+              <label className="block text-sm text-gray-600 mb-1">Start Date</label>
               <input
                 type="date"
                 name="started"
                 value={formData.started}
                 onChange={handleInputChange}
-                className="border rounded-lg p-2 w-full"
+                className="border rounded-lg p-2 w-full h-12"
               />
             </div>
-            <div>
-              <label className="block text-sm text-gray-600 mb-1">
-                Completion Date
-              </label>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 mt-4">
+            <div className="w-full">
+              <label className="block text-sm text-gray-600 mb-1">Completion Date</label>
               <input
                 type="date"
                 name="finished"
                 value={formData.finished}
                 onChange={handleInputChange}
-                className="border rounded-lg p-2 w-full"
+                className="border rounded-lg p-2 w-full h-12"
               />
             </div>
           </div>
 
-          {/* Save Button */}
-          <button
-            className="mt-6 bg-pink-300 hover:bg-pink-400 text-white px-6 py-2 rounded-lg"
-            onClick={() => console.log("Submitted Data:", formData)}
-          >
-            Save Project
-          </button>
+          {/* Action Buttons */}
+          <div className="mt-6 flex gap-4">
+            <button
+              className="bg-pink-300 hover:bg-pink-400 text-white px-6 py-2 rounded-lg"
+              onClick={() => console.log("Submitted Data:", formData)}
+            >
+              Save Project
+            </button>
+            <button
+              className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-2 rounded-lg"
+              onClick={handleCancel}
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       </div>
     </div>
