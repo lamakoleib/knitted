@@ -1,9 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-	images: { domains: ["cdn.discordapp.com"] },
+  images: {
+    domains: ["media.discordapp.net", "cdn.discordapp.com"],
+  },
 };
 
 module.exports = nextConfig;
-
 export default nextConfig;
