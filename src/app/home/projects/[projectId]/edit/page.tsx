@@ -2,6 +2,9 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 
 export default function ProjectDetailsPage() {
   const [projectImage, setProjectImage] = useState<string | null>(null);
@@ -14,7 +17,7 @@ export default function ProjectDetailsPage() {
     yarn: "",
     yardage: "",
     colourway: "",
-    status: "",
+    status: "Started",
     started: "",
     finished: "",
   });
@@ -29,7 +32,9 @@ export default function ProjectDetailsPage() {
   };
 
   // Handles input form changes
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -44,7 +49,7 @@ export default function ProjectDetailsPage() {
       yarn: "",
       yardage: "",
       colourway: "",
-      status: "",
+      status: "Started",
       started: "",
       finished: "",
     });
@@ -52,10 +57,10 @@ export default function ProjectDetailsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-12">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-10">
+    <div className="min-h-screen bg-gray-50 p-4 md:p-12">
+      <div className="max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-6 md:gap-10">
         {/* Project Image */}
-        <div className="relative border-dashed border-2 border-gray-300 rounded-lg h-[480px] flex items-center justify-center">
+        <div className="relative border-dashed border-2 border-gray-300 rounded-lg h-[300px] md:h-[480px] flex items-center justify-center">
           {projectImage ? (
             <Image
               src={projectImage}
@@ -67,7 +72,7 @@ export default function ProjectDetailsPage() {
           ) : (
             <label
               htmlFor="image-upload"
-              className="text-gray-500 cursor-pointer"
+              className="text-gray-500 cursor-pointer text-center"
             >
               Click to upload project image
               <input
@@ -81,18 +86,18 @@ export default function ProjectDetailsPage() {
         </div>
 
         {/* Project Details */}
-        <div>
-          <input
+        <div className="max-w-full">
+          <Input
             type="text"
             name="title"
             value={formData.title}
             onChange={handleInputChange}
             placeholder="Enter project title"
-            className="w-full text-3xl font-bold mb-4 border-b-2 focus:outline-none p-2"
+            className="w-full text-black text-2xl md:text-3xl font-bold mb-4 placeholder:text-red-300"
           />
 
           <p className="text-lg text-gray-500 mb-4">Project Information</p>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {[
               ["pattern", "Pattern"],
               ["category", "Category"],
@@ -102,72 +107,89 @@ export default function ProjectDetailsPage() {
               ["yardage", "Yardage"],
               ["colourway", "Colourway"],
             ].map(([name, placeholder], idx) => (
-              <input
+              <Input
                 key={idx}
                 type="text"
                 name={name}
                 value={formData[name as keyof typeof formData]}
                 onChange={handleInputChange}
                 placeholder={placeholder}
-                className="border rounded-lg p-2 w-full h-12"
+                className="w-full"
               />
             ))}
           </div>
 
           {/* Project Status */}
           <p className="text-lg text-gray-500 mt-6 mb-3">Project Status</p>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Status Dropdown */}
             <div className="w-full">
               <label className="block text-sm text-gray-600 mb-1">Status</label>
-              <input
-                type="text"
-                name="status"
+              <Select
                 value={formData.status}
-                onChange={handleInputChange}
-                placeholder="Status (e.g., Finished)"
-                className="border rounded-lg p-2 w-full h-12"
-              />
+                onValueChange={(value) =>
+                  setFormData({ ...formData, status: value })
+                }
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Started">Started</SelectItem>
+                  <SelectItem value="In Progress">In Progress</SelectItem>
+                  <SelectItem value="Completed">Completed</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
+            {/* Start Date */}
             <div className="w-full">
-              <label className="block text-sm text-gray-600 mb-1">Start Date</label>
-              <input
+              <label className="block text-sm text-gray-600 mb-1">
+                Start Date
+              </label>
+              <Input
                 type="date"
                 name="started"
                 value={formData.started}
                 onChange={handleInputChange}
-                className="border rounded-lg p-2 w-full h-12"
+                className="w-full"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 mt-4">
-            <div className="w-full">
-              <label className="block text-sm text-gray-600 mb-1">Completion Date</label>
-              <input
-                type="date"
-                name="finished"
-                value={formData.finished}
-                onChange={handleInputChange}
-                className="border rounded-lg p-2 w-full h-12"
-              />
+          {/* Conditionally Render Completion Date */}
+          {formData.status === "Completed" && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+              <div className="w-full">
+                <label className="block text-sm text-gray-600 mb-1">
+                  Completion Date
+                </label>
+                <Input
+                  type="date"
+                  name="finished"
+                  value={formData.finished}
+                  onChange={handleInputChange}
+                  className="w-full"
+                />
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Action Buttons */}
-          <div className="mt-6 flex gap-4">
-            <button
-              className="bg-pink-300 hover:bg-pink-400 text-white px-6 py-2 rounded-lg"
+          <div className="mt-6 flex flex-col sm:flex-row gap-4">
+            <Button
+              className="bg-red-200 hover:bg-red-300 text-white"
               onClick={() => console.log("Submitted Data:", formData)}
             >
               Save Project
-            </button>
-            <button
-              className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-2 rounded-lg"
+            </Button>
+            <Button
+              variant="secondary"
               onClick={handleCancel}
+              className="bg-gray-300 hover:bg-gray-400 text-gray-800"
             >
               Cancel
-            </button>
+            </Button>
           </div>
         </div>
       </div>
