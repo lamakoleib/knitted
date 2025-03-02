@@ -1,4 +1,4 @@
-import * as React from "react";
+import * as React from "react"
 import {
 	AudioWaveform,
 	Frame,
@@ -6,9 +6,9 @@ import {
 	Search,
 	Volleyball,
 	Rss,
-} from "lucide-react";
+} from "lucide-react"
 
-import { NavUser } from "./nav-user";
+import { NavUser } from "./nav-user"
 import {
 	Sidebar,
 	SidebarContent,
@@ -20,8 +20,8 @@ import {
 	SidebarMenuItem,
 	SidebarGroup,
 	SidebarGroupLabel,
-} from "@/components/ui/sidebar";
-import { getCurrentUser } from "@/lib/auth-actions";
+} from "@/components/ui/sidebar"
+import { getCurrentUser } from "@/lib/auth-actions"
 
 const data = {
 	user: {
@@ -56,12 +56,12 @@ const data = {
 			icon: Frame,
 		},
 	],
-};
+}
 
 export async function AppSidebar({
 	...props
 }: React.ComponentProps<typeof Sidebar>) {
-	const user = await getCurrentUser();
+	const user = await getCurrentUser()
 	return (
 		<Sidebar collapsible="icon" {...props}>
 			<SidebarHeader>
@@ -102,5 +102,5 @@ export async function AppSidebar({
 			</SidebarFooter>
 			<SidebarRail />
 		</Sidebar>
-	);
+	)
 }

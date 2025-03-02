@@ -30,8 +30,6 @@ export async function login(formData: FormData) {
 export async function signup(formData: FormData) {
 	const supabase = await createClient()
 
-	// type-casting here for convenience
-	// in practice, you should validate your inputs
 	const firstName = formData.get("first-name") as string
 	const lastName = formData.get("last-name") as string
 	console.log(formData)
@@ -54,10 +52,7 @@ export async function signup(formData: FormData) {
 	revalidatePath("/", "layout")
 	redirect("/home")
 }
-// TODO: Add typing for the user object, should return Promise<Union:...:> type?
-// Preferebly, we should use the type for profile from database.types, so we need to
-// change this to getProfileByID and make use of the auth users ID to get the profile
-// But profiles table has not been fully implemented.
+
 export async function getCurrentUser() {
 	const supabase = await createClient()
 	const { data, error } = await supabase.auth.getUser()
