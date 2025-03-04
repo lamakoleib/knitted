@@ -4,6 +4,8 @@ import {
 	SidebarInset,
 } from "@/components/ui/sidebar"
 import { AppSidebar } from "./components/app-sidebar"
+} from "@/components/ui/sidebar"
+import { AppSidebar } from "./components/app-sidebar"
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -13,9 +15,12 @@ import {
 	BreadcrumbPage,
 } from "@/components/ui/breadcrumb"
 import { Separator } from "@/components/ui/separator"
+} from "@/components/ui/breadcrumb"
+import { Separator } from "@/components/ui/separator"
 export default async function Layout({
 	children,
 }: {
+	children: React.ReactNode
 	children: React.ReactNode
 }) {
 	return (
@@ -38,5 +43,6 @@ export default async function Layout({
 				<div className="bg-muted w-full h-full">{children}</div>
 			</SidebarInset>
 		</SidebarProvider>
+	)
 	)
 }
