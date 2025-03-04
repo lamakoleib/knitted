@@ -39,7 +39,7 @@ export default async function Layout({
         <div className="bg-muted w-full h-full">
           {children}
 
-          <Dock />
+          {/* <Dock /> */}
         </div>
       </SidebarInset>
     </SidebarProvider>
