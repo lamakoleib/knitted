@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    domains: ["media.discordapp.net", "cdn.discordapp.com"],
+    domains: ["ixatiutcoyuxqayxuucb.supabase.co"],
   },
 }
 
