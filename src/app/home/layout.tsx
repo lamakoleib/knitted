@@ -13,6 +13,7 @@ import {
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb"
 import { Separator } from "@/components/ui/separator"
+import { Dock } from "./components/dock"
 export default async function Layout({
   children,
 }: {
@@ -35,7 +36,11 @@ export default async function Layout({
             </Breadcrumb>
           </div>
         </header>
-        <div className="bg-muted w-full h-full">{children}</div>
+        <div className="bg-muted w-full h-full">
+          {children}
+
+          <Dock />
+        </div>
       </SidebarInset>
     </SidebarProvider>
   )
