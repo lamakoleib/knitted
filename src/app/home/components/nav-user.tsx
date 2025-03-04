@@ -1,9 +1,9 @@
-"use client";
+"use client"
 
-import { BadgeCheck, Bell, ChevronsUpDown, Inbox, LogOut } from "lucide-react";
-import { signout } from "@/lib/auth-actions";
+import { BadgeCheck, Bell, ChevronsUpDown, Inbox, LogOut } from "lucide-react"
+import { signout } from "@/lib/auth-actions"
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -12,19 +12,20 @@ import {
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu"
 import {
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
 	useSidebar,
-} from "@/components/ui/sidebar";
+} from "@/components/ui/sidebar"
+import Link from "next/link"
 
 // TODO: Fix typing
 // See todo in auth-actions.ts
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function NavUser({ user }: { user: any }) {
-	const { isMobile } = useSidebar();
+	const { isMobile } = useSidebar()
 
 	return (
 		<SidebarMenu>
@@ -81,10 +82,12 @@ export function NavUser({ user }: { user: any }) {
 						<DropdownMenuSeparator />
 						<DropdownMenuSeparator />
 						<DropdownMenuGroup>
-							<DropdownMenuItem>
-								<BadgeCheck />
-								Account
-							</DropdownMenuItem>
+							<Link href="/profile">
+								<DropdownMenuItem>
+									<BadgeCheck />
+									Account
+								</DropdownMenuItem>
+							</Link>
 							<DropdownMenuItem>
 								<Inbox />
 								Inbox
@@ -103,5 +106,5 @@ export function NavUser({ user }: { user: any }) {
 				</DropdownMenu>
 			</SidebarMenuItem>
 		</SidebarMenu>
-	);
+	)
 }
