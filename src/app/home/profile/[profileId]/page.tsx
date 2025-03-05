@@ -65,9 +65,11 @@ export default async function Profile({
 
 						<div className="flex gap-2 mt-2 md:mt-0 md:ml-auto">
 							{isOwner ? (
-								<Button className="bg-red-300 text-primary-foreground hover:bg-red-300/90">
+								<Link href="/settings">
+								  <Button className="bg-red-300 text-primary-foreground hover:bg-red-300/90">
 									Settings
-								</Button>
+								  </Button>
+								</Link>
 							) : isFollower ? (
 								<Unfollow profileId={profileId} />
 							) : (
@@ -81,17 +83,21 @@ export default async function Profile({
 									</Button>
 								</DropdownMenuTrigger>
 								<DropdownMenuContent align="end">
-									<DropdownMenuItem>
+									{/* <DropdownMenuItem>
 										<Settings className="mr-2 h-4 w-4" />
 										<span>Settings</span>
+									</DropdownMenuItem> */}
+									<DropdownMenuItem>
+									<Bookmark className="mr-2 h-4 w-4" />
+										<span>Archived</span>
 									</DropdownMenuItem>
 									<DropdownMenuItem>
 										<Ban className="mr-2 h-4 w-4" />
-										<span>Block</span>
+										<span>Blocked</span>
 									</DropdownMenuItem>
 									<DropdownMenuItem>
 										<Bookmark className="mr-2 h-4 w-4" />
-										<span>Add to list</span>
+										<span>Saved</span>
 									</DropdownMenuItem>
 								</DropdownMenuContent>
 							</DropdownMenu>

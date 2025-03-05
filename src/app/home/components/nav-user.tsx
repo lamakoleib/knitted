@@ -1,6 +1,6 @@
 "use client"
 
-import { BadgeCheck, Bell, ChevronsUpDown, Inbox, LogOut } from "lucide-react"
+import { BadgeCheck, Bell, ChevronsUpDown, Inbox, LogOut, Settings } from "lucide-react"
 import { signout } from "@/lib/auth-actions"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -80,22 +80,20 @@ export function NavUser({ user }: { user: any }) {
 							</div>
 						</DropdownMenuLabel>
 						<DropdownMenuSeparator />
-						<DropdownMenuSeparator />
 						<DropdownMenuGroup>
-							<Link href="/profile">
+							{/* Updated profile link to `/home/profile/{user.id}` */}
+							<Link href={`/home/profile/${user.id}`}>
 								<DropdownMenuItem>
 									<BadgeCheck />
-									Account
+									Profile
 								</DropdownMenuItem>
 							</Link>
-							<DropdownMenuItem>
-								<Inbox />
-								Inbox
-							</DropdownMenuItem>
-							<DropdownMenuItem>
-								<Bell />
-								Notifications
-							</DropdownMenuItem>
+							<Link href="/settings">
+								<DropdownMenuItem>
+									<Settings />
+									Settings
+								</DropdownMenuItem>
+							</Link>
 						</DropdownMenuGroup>
 						<DropdownMenuSeparator />
 						<DropdownMenuItem onClick={signout}>

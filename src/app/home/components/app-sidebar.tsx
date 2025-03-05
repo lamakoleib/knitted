@@ -6,6 +6,9 @@ import {
   Search,
   Volleyball,
   Rss,
+  MessageCircle,
+  Bell,
+  PlusCircle
 } from "lucide-react"
 
 import { NavUser } from "./nav-user"
@@ -32,17 +35,17 @@ const data = {
   options: [
     {
       name: "Feed",
-      url: "#",
+      url: "/home/feed",
       icon: Rss,
     },
-    {
+    /*{
       name: "Explore",
       url: "#",
       icon: Map,
-    },
+    },*/
     {
       name: "Search",
-      url: "#",
+      url: "/home/search",
       icon: Search,
     },
     {
@@ -55,6 +58,21 @@ const data = {
       url: "#",
       icon: Frame,
     },
+    {
+      name: "Messages",
+      url: "#",
+      icon: MessageCircle,
+    },
+    {
+      name: "Notifications",
+      url: "#",
+      icon: Bell,
+    },
+    {
+      name: "Create Project",
+      url: "/home/upload",
+      icon: PlusCircle,
+    }
   ],
 }
 

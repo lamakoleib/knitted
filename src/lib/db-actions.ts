@@ -14,6 +14,26 @@ type ActionResponse = {
   data?: any
 }
 
+export async function searchProfiles(searchTerm: string): Promise<Partial<Tables<"Profiles">>[]> {
+  const supabase = await createClient();
+  const formattedSearchTerm = `%${searchTerm.trim()}%`;
+  
+  console.log("Search Term:", formattedSearchTerm);
+
+  const { data, error } = await supabase
+    .from("Profiles")
+    .select("id, full_name, username, email, follower_count")
+    .or(`full_name.ilike.${formattedSearchTerm}, username.ilike.${formattedSearchTerm}`);
+
+  console.log("Query Result:", data);
+
+  if (error) {
+    console.error("Error searching profiles:", error);
+    return [];
+  }
+  return data ?? [];
+}
+
 export async function getProfileByID(id: string): Promise<Tables<"Profiles">> {
   const supabase = await createClient()
   const { data, error } = await supabase
@@ -87,7 +107,7 @@ export async function updateProfile(formData: FormData) {
     .update({ username, bio, initialized: true })
     .eq("id", user.user.id)
     .select()
-
+    
   if (error) {
     console.log("Error updating profile:", error)
   } else {
