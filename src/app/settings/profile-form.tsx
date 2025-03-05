@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { updateProfile } from "@/lib/db-actions"
+import { Tables } from "@/types/database.types"
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 const ACCEPTED_IMAGE_TYPES = [
@@ -53,19 +54,16 @@ const profileFormSchema = z.object({
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>
 
-// In a real application, you would fetch these values from your database
 interface ProfileFormProps {
-  defaultValues?: Partial<ProfileFormValues>
-  avatarUrl?: string | null
+  profile: Tables<"Profiles">
 }
 
-export function ProfileForm({
-  defaultValues = {
-    username: "johndoe",
-    bio: "I like to knit!",
-  },
-  avatarUrl = null,
-}: ProfileFormProps) {
+export function ProfileForm({ profile }: ProfileFormProps) {
+  const avatarUrl = profile.avatar_url
+  const defaultValues = {
+    username: profile.username ?? "",
+    bio: profile.bio ?? "I like to knit!",
+  }
   const [imagePreview, setImagePreview] = useState<string | null>(avatarUrl)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -102,7 +100,6 @@ export function ProfileForm({
     setIsSubmitting(true)
 
     try {
-      // Create FormData for file upload
       const formData = new FormData()
       formData.append("username", data.username)
       formData.append("bio", data.bio)

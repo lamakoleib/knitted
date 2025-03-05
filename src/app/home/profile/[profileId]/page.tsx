@@ -20,7 +20,11 @@ import {
   Ban,
   CheckCircle2,
 } from "lucide-react"
-import { getProfileByID, isFollowing } from "@/lib/db-actions"
+import {
+  getProfileByID,
+  getProjectsByUserID,
+  isFollowing,
+} from "@/lib/db-actions"
 import { getCurrentUser } from "@/lib/auth-actions"
 import Follow from "../components/follow-button"
 import Unfollow from "../components/unfollow-button"
@@ -35,7 +39,7 @@ export default async function Profile({
   const currentUser = await getCurrentUser()
   const isOwner = currentUser.user.id == profileId
   const isFollower = await isFollowing(profileId)
-  console.log(profile)
+  const projects = await getProjectsByUserID(profileId)
   return (
     <div className="container max-w-4xl mx-auto px-4 py-8 bg-muted">
       {/* Profile Header */}
@@ -59,13 +63,6 @@ export default async function Profile({
           <div className="flex flex-col md:flex-row md:items-center gap-4">
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-semibold">{profile.username}</h1>
-              {/* <Badge
-								variant="outline"
-								className="rounded-full bg-blue-50 text-blue-600 border-blue-200 flex items-center gap-1 px-2"
-							>
-								<CheckCircle2 className="h-3 w-3" />
-								<span className="text-xs">Verified</span>
-							</Badge> */}
             </div>
 
             <div className="flex gap-2 mt-2 md:mt-0 md:ml-auto">
@@ -88,10 +85,6 @@ export default async function Profile({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  {/* <DropdownMenuItem>
-										<Settings className="mr-2 h-4 w-4" />
-										<span>Settings</span>
-									</DropdownMenuItem> */}
                   <DropdownMenuItem>
                     <Bookmark className="mr-2 h-4 w-4" />
                     <span>Archived</span>
@@ -128,11 +121,7 @@ export default async function Profile({
           {/* Bio */}
           <div className="space-y-1">
             <h2 className="font-semibold">{profile.full_name}</h2>
-            {/* <p className="text-sm text-muted-foreground">Digital creator</p> */}
             <p className="text-sm">{profile.bio}</p>
-            {/* <Link href="#" className="text-sm text-blue-600 hover:underline">
-							www.janedoe.com
-						</Link> */}
           </div>
         </div>
       </div>
@@ -152,13 +141,11 @@ export default async function Profile({
 
         <TabsContent value="posts" className="mt-6">
           <div className="grid grid-cols-3 gap-1">
-            {Array.from({ length: 9 }).map((_, i) => (
+            {projects.map((project, i) => (
               <div key={i} className="aspect-square relative group">
                 <Image
-                  src={`/placeholder.svg?height=300&width=300&text=Post${
-                    i + 1
-                  }`}
-                  alt={`Post ${i + 1}`}
+                  src={project.images[0]}
+                  alt={project.title}
                   fill
                   className="object-cover"
                 />
