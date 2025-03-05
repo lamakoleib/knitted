@@ -14,24 +14,28 @@ type ActionResponse = {
   data?: any
 }
 
-export async function searchProfiles(searchTerm: string): Promise<Partial<Tables<"Profiles">>[]> {
-  const supabase = await createClient();
-  const formattedSearchTerm = `%${searchTerm.trim()}%`;
-  
-  console.log("Search Term:", formattedSearchTerm);
+export async function searchProfiles(
+  searchTerm: string
+): Promise<Partial<Tables<"Profiles">>[]> {
+  const supabase = await createClient()
+  const formattedSearchTerm = `%${searchTerm.trim()}%`
+
+  console.log("Search Term:", formattedSearchTerm)
 
   const { data, error } = await supabase
     .from("Profiles")
     .select("id, full_name, username, email, follower_count")
-    .or(`full_name.ilike.${formattedSearchTerm}, username.ilike.${formattedSearchTerm}`);
+    .or(
+      `full_name.ilike.${formattedSearchTerm}, username.ilike.${formattedSearchTerm}`
+    )
 
-  console.log("Query Result:", data);
+  console.log("Query Result:", data)
 
   if (error) {
-    console.error("Error searching profiles:", error);
-    return [];
+    console.error("Error searching profiles:", error)
+    return []
   }
-  return data ?? [];
+  return data ?? []
 }
 
 export async function getProfileByID(id: string): Promise<Tables<"Profiles">> {
@@ -91,31 +95,105 @@ export async function getCurrentUserProfile(): Promise<Tables<"Profiles">> {
 }
 
 export async function updateProfile(formData: FormData) {
-  const username = formData.get("username") as string
-  const bio = formData.get("bio") as string
+  try {
+    const username = formData.get("username") as string
+    const bio = formData.get("bio") as string
+    const profilePicture = formData.get("profilePicture") as File | null
 
-  const user = await getCurrentUser()
-  if (!user) {
-    console.error("User not authenticated")
-    return
+    const user = await getCurrentUser()
+    if (!user) {
+      console.error("User not authenticated")
+      throw new Error("User not authenticated")
+    }
+
+    const supabase = await createClient()
+    let avatarUrl = null
+
+    if (profilePicture && profilePicture.size > 0) {
+      console.log("Uploading profile picture...")
+
+      const timestamp = Date.now()
+      const randomString = Math.random().toString(36).substring(2, 10)
+      const fileName = `avatar-${timestamp}-${randomString}.${profilePicture.name
+        .split(".")
+        .pop()}`
+      const filePath = `${user.user.id}/avatars/${fileName}`
+
+      const arrayBuf = await profilePicture.arrayBuffer()
+
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from("knitted-images")
+        .upload(filePath, arrayBuf, {
+          contentType: profilePicture.type,
+          cacheControl: "3600",
+          upsert: false,
+        })
+
+      if (uploadError) {
+        console.error("Error uploading to Supabase:", uploadError)
+        throw new Error(
+          `Failed to upload profile picture: ${uploadError.message}`
+        )
+      }
+
+      const { data: publicUrlData } = supabase.storage
+        .from("knitted-images")
+        .getPublicUrl(filePath)
+
+      avatarUrl = publicUrlData.publicUrl
+      console.log("Profile picture uploaded successfully:", avatarUrl)
+    }
+
+    const updateData: {
+      username: string
+      bio: string
+      initialized: boolean
+      avatar_url?: string
+    } = {
+      username,
+      bio,
+      initialized: true,
+    }
+
+    if (avatarUrl) {
+      updateData.avatar_url = avatarUrl
+    }
+
+    const { data, error } = await supabase
+      .from("Profiles")
+      .update(updateData)
+      .eq("id", user.user.id)
+      .select()
+
+    if (error) {
+      console.error("Error updating profile:", error)
+      throw new Error(`Failed to update profile: ${error.message}`)
+    }
+
+    console.log("Profile updated successfully:", data)
+
+    if (avatarUrl && data[0]?.avatar_url && data[0].avatar_url !== avatarUrl) {
+      try {
+        const oldAvatarPath = data[0].avatar_url.split("/").slice(-2).join("/")
+        if (oldAvatarPath && oldAvatarPath.includes(user.user.id)) {
+          await supabase.storage.from("profile-images").remove([oldAvatarPath])
+          console.log("Old avatar removed successfully")
+        }
+      } catch (cleanupError) {
+        console.warn("Failed to remove old avatar:", cleanupError)
+      }
+    }
+
+    revalidatePath("/", "layout")
+    redirect("/home/profile")
+  } catch (error) {
+    console.error("Error in updateProfile:", error)
+    return {
+      success: false,
+      message:
+        error instanceof Error ? error.message : "Failed to update profile",
+    }
   }
-
-  const supabase = await createClient()
-
-  const { data, error } = await supabase
-    .from("Profiles")
-    .update({ username, bio, initialized: true })
-    .eq("id", user.user.id)
-    .select()
-    
-  if (error) {
-    console.log("Error updating profile:", error)
-  } else {
-    console.log("Update successful:", data)
-  }
-
-  revalidatePath("/", "layout")
-  redirect("/home")
 }
 
 export async function getFollowersByUserID(
@@ -286,7 +364,6 @@ export async function uploadProject(
     }
   }
   const data = validatedFields.data
-  console.log("validated schema")
   try {
     const images = formData.getAll("images") as File[]
     const imageUrls: string[] = []
@@ -295,7 +372,6 @@ export async function uploadProject(
     const folderPath = `projects/${timestamp}-${randomString}`
     const supabase = await createClient()
     const user = await getCurrentUser()
-    console.log("Going over images...")
     for (const image of images) {
       console.log("Image:" + image.name)
       const fileName = `${Date.now()}-${image.name
