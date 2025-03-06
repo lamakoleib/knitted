@@ -180,10 +180,12 @@ export type Database = {
       }
       Project: {
         Row: {
+          comments: string[] | null
           created_at: string
           description: string | null
           difficulty: string | null
           images: string[]
+          like_count: number
           needle_size: string
           pattern: string | null
           project_id: number
@@ -195,10 +197,12 @@ export type Database = {
           yarn: string[] | null
         }
         Insert: {
+          comments?: string[] | null
           created_at?: string
           description?: string | null
           difficulty?: string | null
           images: string[]
+          like_count?: number
           needle_size: string
           pattern?: string | null
           project_id?: number
@@ -210,10 +214,12 @@ export type Database = {
           yarn?: string[] | null
         }
         Update: {
+          comments?: string[] | null
           created_at?: string
           description?: string | null
           difficulty?: string | null
           images?: string[]
+          like_count?: number
           needle_size?: string
           pattern?: string | null
           project_id?: number
