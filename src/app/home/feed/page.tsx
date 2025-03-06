@@ -1,5 +1,5 @@
 import { getFeedPosts } from "@/lib/db-actions"
-import { PostCard } from "./components/post-card"
+import { PostCard } from "@/app/home/feed/components/post-card"
 
 export default async function Feed() {
   const feedPosts = await getFeedPosts()
