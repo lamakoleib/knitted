@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { z } from "zod"
 import { projectSchema } from "@/types/schemas"
+import { FeedPost } from "@/types/feed"
 
 type ActionResponse = {
   success: boolean
@@ -436,4 +437,47 @@ export async function uploadProject(
           : "Failed to create project. Please try again.",
     }
   }
+}
+
+export async function getFeedPosts(): Promise<FeedPost[]> {
+  const supabase = await createClient()
+
+  const user = await getCurrentUser()
+
+  if (!user) {
+    return []
+  }
+
+  const { data: followingData, error: followingError } = await supabase
+    .from("Followers")
+    .select("followers_id")
+    .eq("user_id", user.user.id)
+
+  if (followingError || !followingData.length) {
+    return []
+  }
+
+  const followedUserIds = followingData.map((follow) => follow.followers_id)
+
+  const { data: posts, error: postsError } = await supabase
+    .from("Project")
+    .select(
+      `
+		*,
+		Profiles:user_id (
+		  id,
+		  username,
+		  avatar_url,
+		  full_name
+		)
+	  `
+    )
+    .in("user_id", followedUserIds)
+    .order("created_at", { ascending: false })
+
+  if (postsError) {
+    return []
+  }
+
+  return posts
 }

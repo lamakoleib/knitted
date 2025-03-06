@@ -8,7 +8,7 @@ import {
   Rss,
   MessageCircle,
   Bell,
-  PlusCircle
+  PlusCircle,
 } from "lucide-react"
 
 import { NavUser } from "./nav-user"
@@ -25,6 +25,7 @@ import {
   SidebarGroupLabel,
 } from "@/components/ui/sidebar"
 import { getCurrentUser } from "@/lib/auth-actions"
+import { getCurrentUserProfile } from "@/lib/db-actions"
 
 const data = {
   user: {
@@ -72,7 +73,7 @@ const data = {
       name: "Create Project",
       url: "/home/upload",
       icon: PlusCircle,
-    }
+    },
   ],
 }
 
@@ -80,6 +81,7 @@ export async function AppSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
   const user = await getCurrentUser()
+  const profile = await getCurrentUserProfile()
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -116,7 +118,7 @@ export async function AppSidebar({
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={user.user} />
+        <NavUser profile={profile} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
