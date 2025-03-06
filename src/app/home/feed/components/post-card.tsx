@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Image from "next/image"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -10,25 +10,112 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card"
-import { type FeedPost } from "@/types/feed"
+import type { FeedPost } from "@/types/feed"
 import { Input } from "@/components/ui/input"
 import { Bookmark, Heart, MessageCircle, Plus } from "lucide-react"
 import Link from "next/link"
 import { formatPostTime } from "@/utils/format-date"
+import {
+  isLiked,
+  isSaved,
+  likePost,
+  unsavePost,
+  savePost,
+  unlikePost,
+  addComment,
+  getComments,
+} from "@/lib/db-actions"
+import { Tables } from "@/types/database.types"
 
-export function PostCard({ post }: { post: FeedPost }) {
+type Comment = {
+  id: number
+  comment: string
+  created_at: string
+  user_id: string
+  username: string
+  avatar_url?: string
+}
+
+export function PostCard({
+  post,
+  profile,
+}: {
+  post: FeedPost
+  profile: Tables<"Profiles">
+}) {
   const [liked, setLiked] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [likeCount, setLikeCount] = useState(post.like_count)
+  const [comments, setComments] = useState<Comment[]>([])
+  const [isLoadingComments, setIsLoadingComments] = useState(false)
+
+  useEffect(() => {
+    const fetchStatus = async () => {
+      setLiked(await isLiked(post.project_id))
+      setSaved(await isSaved(post.project_id))
+      fetchComments()
+    }
+    fetchStatus()
+  }, [post.project_id])
+
   const [showAllComments, setShowAllComments] = useState(false)
   const [commentText, setCommentText] = useState("")
 
-  const toggleLike = () => {
-    setLiked(!liked)
+  const fetchComments = async () => {
+    setIsLoadingComments(true)
+    try {
+      const fetchedComments = await getComments(post.project_id)
+      console.log(fetchedComments)
+      setComments(fetchedComments)
+    } catch (error) {
+      console.error("Error fetching comments:", error)
+    } finally {
+      setIsLoadingComments(false)
+    }
   }
 
-  const toggleSave = () => {
-    setSaved(!saved)
+  const toggleLike = async () => {
+    try {
+      if (liked) {
+        await unlikePost(post.project_id)
+        setLikeCount(likeCount - 1)
+      } else {
+        setLikeCount(likeCount + 1)
+        await likePost(post.project_id)
+      }
+      setLiked(!liked)
+    } catch (error) {
+      console.error("Error toggling like:", error)
+    }
   }
+
+  const toggleSave = async () => {
+    try {
+      if (saved) {
+        await unsavePost(post.project_id)
+      } else {
+        await savePost(post.project_id)
+      }
+      setSaved(!saved)
+    } catch (error) {
+      console.error("Error toggling save:", error)
+    }
+  }
+
+  const handleAddComment = async () => {
+    if (!commentText.trim()) return
+
+    try {
+      const newComment = await addComment(post.project_id, commentText)
+      setComments([...comments, newComment])
+      setCommentText("")
+    } catch (error) {
+      console.error("Error adding comment:", error)
+    }
+  }
+
+  // Get displayed comments based on showAllComments state
+  const displayedComments = showAllComments ? comments : comments.slice(0, 2)
 
   const { display: displayTime, title } = formatPostTime(post.created_at)
 
@@ -80,9 +167,7 @@ export function PostCard({ post }: { post: FeedPost }) {
         {/* Caption and Comments */}
         <div className="flex flex-col gap-2 pt-3 pl-1">
           <p className="text-sm">
-            <span className="font-medium">
-              {post.like_count + (liked ? 1 : 0)} likes
-            </span>
+            <span className="font-medium">{likeCount} likes</span>
           </p>
           <p className="text-sm">
             <span className="font-medium">
@@ -93,25 +178,29 @@ export function PostCard({ post }: { post: FeedPost }) {
             <span>{post.description}</span>
           </p>
 
-          {/* {post.comments.length > 0 && (
+          {comments.length > 0 && (
             <div className="space-y-1">
-              {post.comments.length > 1 && !showAllComments && (
+              {comments.length > 2 && !showAllComments && (
                 <button
                   className="text-muted-foreground text-xs"
                   onClick={() => setShowAllComments(true)}
                 >
-                  View all {post.comments.length} comments
+                  View all {comments.length} comments
                 </button>
               )}
 
-              {displayedComments.map((comment: any, index: any) => (
-                <p key={index} className="text-sm">
-                  <span className="font-medium">{comment.username}</span>{" "}
-                  <span>{comment.text}</span>
+              {displayedComments.map((comment) => (
+                <p key={comment.id} className="text-sm">
+                  <span className="font-medium">
+                    <Link href={`/home/profile/${comment.user_id}`}>
+                      {comment.username}
+                    </Link>
+                  </span>{" "}
+                  <span>{comment.comment}</span>
                 </p>
               ))}
 
-              {showAllComments && post.comments.length > 1 && (
+              {showAllComments && comments.length > 2 && (
                 <button
                   className="text-muted-foreground text-xs"
                   onClick={() => setShowAllComments(false)}
@@ -120,14 +209,14 @@ export function PostCard({ post }: { post: FeedPost }) {
                 </button>
               )}
             </div>
-          )} */}
+          )}
 
           {/* Comment Input */}
           <div className="flex items-center gap-2 pt-2">
             <Avatar className="h-6 w-6">
               <AvatarImage
-                src="/placeholder.svg?height=24&width=24&text=Me"
-                alt="Me"
+                src={profile.avatar_url ?? ""}
+                alt={profile.username ?? profile.full_name}
               />
               <AvatarFallback>Me</AvatarFallback>
             </Avatar>
@@ -136,12 +225,19 @@ export function PostCard({ post }: { post: FeedPost }) {
               className="h-8 text-xs border-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 px-0"
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && commentText.trim()) {
+                  e.preventDefault()
+                  handleAddComment()
+                }
+              }}
             />
             {commentText.trim() && (
               <Button
                 variant="ghost"
                 size="sm"
                 className="h-6 px-2 text-xs text-primary font-medium"
+                onClick={handleAddComment}
               >
                 Post
               </Button>

@@ -16,11 +16,11 @@ type ActionResponse = {
 }
 
 export async function searchProfiles(searchTerm: string) {
-  if (searchTerm.trim().length < 2) return [];
-  const supabase = await createClient();
-  const formattedSearchTerm = `%${searchTerm.trim()}%`;
+  if (searchTerm.trim().length < 2) return []
+  const supabase = await createClient()
+  const formattedSearchTerm = `%${searchTerm.trim()}%`
 
-  console.log("Search Term:", formattedSearchTerm);
+  console.log("Search Term:", formattedSearchTerm)
 
   const { data, error } = await supabase
     .from("Profiles")
@@ -28,16 +28,16 @@ export async function searchProfiles(searchTerm: string) {
     .or(
       `full_name.ilike.${formattedSearchTerm}, username.ilike.${formattedSearchTerm}`
     )
-    .limit(10); //limit results to avoid excessive queries
+    .limit(10) //limit results to avoid excessive queries
 
-  console.log("Query Result:", data);
+  console.log("Query Result:", data)
 
   if (error) {
-    console.error("Error searching profiles:", error);
-    return [];
+    console.error("Error searching profiles:", error)
+    return []
   }
 
-  return data ?? [];
+  return data ?? []
 }
 
 export async function getProfileByID(id: string): Promise<Tables<"Profiles">> {
@@ -481,4 +481,162 @@ export async function getFeedPosts(): Promise<FeedPost[]> {
   }
 
   return posts
+}
+
+export async function likePost(projectId: number) {
+  const user = await getCurrentUser()
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from("Likes")
+    .insert({ project_id: projectId, user_id: user.user.id })
+  if (error) {
+    throw error
+  }
+}
+
+export async function unlikePost(projectId: number) {
+  const user = await getCurrentUser()
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from("Likes")
+    .delete()
+    .eq("user_id", user.user.id)
+    .eq("project_id", projectId)
+  if (error) {
+    throw error
+  }
+}
+
+export async function savePost(projectId: number) {
+  const user = await getCurrentUser()
+  if (!user || !user.user?.id) return { error: "User not found" }
+
+  const supabase = await createClient()
+
+  const { error } = await supabase
+    .from("Profiles")
+    .update({
+      saved_projects: supabase.rpc("array_append", {
+        column: "saved_projects",
+        value: projectId,
+      }),
+    })
+    .eq("id", user.user.id)
+
+  return { success: !error, error }
+}
+
+export async function unsavePost(projectId: number) {
+  const user = await getCurrentUser()
+  if (!user || !user.user?.id) return { error: "User not found" }
+
+  const supabase = await createClient()
+
+  const { error } = await supabase
+    .from("Profiles")
+    .update({
+      saved_projects: supabase.rpc("array_remove", {
+        column: "saved_projects",
+        value: projectId,
+      }),
+    })
+    .eq("id", user.user.id)
+
+  return { success: !error, error }
+}
+
+export async function isLiked(projectId: number) {
+  const user = await getCurrentUser()
+  const supabase = await createClient()
+  const { count, error } = await supabase
+    .from("Likes")
+    .select("*", { count: "exact", head: true }) // head: true returns only the count
+    .eq("user_id", user.user.id)
+    .eq("project_id", projectId)
+  if (error) {
+    console.log(error)
+    return false
+  }
+  return (count ?? 0) > 0
+}
+
+export async function isSaved(projectId: number) {
+  const user = await getCurrentUser()
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from("Profiles")
+    .select("saved_projects")
+    .eq("id", user.user.id)
+    .single()
+  if (error) return false
+  return (data.saved_projects ?? []).includes(projectId)
+}
+
+export async function addComment(projectId: number, comment: string) {
+  const supabase = await createClient()
+  const user = await getCurrentUser()
+
+  if (!user) throw new Error("User not authenticated")
+
+  // First insert the comment
+  const { data: commentData, error: commentError } = await supabase
+    .from("Comments")
+    .insert({
+      project_id: projectId,
+      user_id: user.user.id,
+      comment: comment,
+    })
+    .select("comment_id, created_at")
+    .single()
+
+  if (commentError) throw commentError
+
+  const { data: profileData, error: profileError } = await supabase
+    .from("Profiles")
+    .select("username, avatar_url")
+    .eq("id", user.user.id)
+    .single()
+
+  if (profileError) throw profileError
+
+  return {
+    id: commentData.comment_id,
+    comment,
+    created_at: commentData.created_at,
+    user_id: user.user.id,
+    username: profileData.username,
+    avatar_url: profileData.avatar_url,
+  }
+}
+
+export async function getComments(projectId: number) {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from("Comments")
+    .select(
+      `
+      comment_id,
+      created_at,
+      comment,
+      user_id,
+      Profiles:user_id (
+        username,
+        avatar_url
+      )
+    `
+    )
+    .eq("project_id", projectId)
+    .order("created_at", { ascending: false })
+
+  if (error) throw error
+
+  return data.map((comment: any) => ({
+    id: comment.comment_id,
+    comment: comment.comment,
+    created_at: comment.created_at,
+    user_id: comment.user_id,
+    username: comment.Profiles?.username || "Unknown User",
+    avatar_url: comment.Profiles?.avatar_url,
+  }))
 }
