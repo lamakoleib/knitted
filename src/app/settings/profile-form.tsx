@@ -274,9 +274,12 @@ export function ProfileForm({ profile }: ProfileFormProps) {
           </div>
         </div>
         <div className="flex justify-end">
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Updating..." : "Update profile"}
-          </Button>
+        <Button
+          type="submit"
+          disabled={isSubmitting}
+          className="bg-red-300 text-primary-foreground hover:bg-red-300/90">
+          {isSubmitting ? "Updating..." : "Update profile"}
+        </Button>
         </div>
       </form>
     </Form>

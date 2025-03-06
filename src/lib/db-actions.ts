@@ -15,13 +15,12 @@ type ActionResponse = {
   data?: any
 }
 
-export async function searchProfiles(
-  searchTerm: string
-): Promise<Partial<Tables<"Profiles">>[]> {
-  const supabase = await createClient()
-  const formattedSearchTerm = `%${searchTerm.trim()}%`
+export async function searchProfiles(searchTerm: string) {
+  if (searchTerm.trim().length < 2) return [];
+  const supabase = await createClient();
+  const formattedSearchTerm = `%${searchTerm.trim()}%`;
 
-  console.log("Search Term:", formattedSearchTerm)
+  console.log("Search Term:", formattedSearchTerm);
 
   const { data, error } = await supabase
     .from("Profiles")
@@ -29,14 +28,16 @@ export async function searchProfiles(
     .or(
       `full_name.ilike.${formattedSearchTerm}, username.ilike.${formattedSearchTerm}`
     )
+    .limit(10); //limit results to avoid excessive queries
 
-  console.log("Query Result:", data)
+  console.log("Query Result:", data);
 
   if (error) {
-    console.error("Error searching profiles:", error)
-    return []
+    console.error("Error searching profiles:", error);
+    return [];
   }
-  return data ?? []
+
+  return data ?? [];
 }
 
 export async function getProfileByID(id: string): Promise<Tables<"Profiles">> {
