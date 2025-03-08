@@ -44,6 +44,7 @@ export function NavUser({ profile }: { profile: Tables<"Profiles"> }) {
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
+              {/* User avatar */}
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage
                   src={profile.avatar_url ?? ""}
@@ -56,6 +57,7 @@ export function NavUser({ profile }: { profile: Tables<"Profiles"> }) {
                     .join("")}
                 </AvatarFallback>
               </Avatar>
+              {/* User details */}
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">
                   {profile.full_name}
@@ -65,12 +67,15 @@ export function NavUser({ profile }: { profile: Tables<"Profiles"> }) {
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
+          
+          {/* Dropdown menu */}
           <DropdownMenuContent
             className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
             side={isMobile ? "bottom" : "right"}
             align="end"
             sideOffset={4}
           >
+            {/* User information in dropdown */}
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
@@ -94,8 +99,9 @@ export function NavUser({ profile }: { profile: Tables<"Profiles"> }) {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
+            
+            {/* Navigation options */}
             <DropdownMenuGroup>
-              {/* Updated profile link to `/home/profile/{user.id}` */}
               <Link href={`/home/profile/${profile.id}`}>
                 <DropdownMenuItem>
                   <BadgeCheck />
@@ -110,6 +116,8 @@ export function NavUser({ profile }: { profile: Tables<"Profiles"> }) {
               </Link>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
+            
+            {/* Logout btn */}
             <DropdownMenuItem onClick={signout}>
               <LogOut />
               Log out

@@ -13,6 +13,7 @@ export default function SearchPage() {
   const [profiles, setProfiles] = useState<Partial<Tables<"Profiles">>[]>([]);
   const [loading, setLoading] = useState(false);
 
+  //Clears the profile list when the search term's empty
   useEffect(() => {
     if (!searchTerm.trim()) {
       setProfiles([]);
@@ -29,9 +30,9 @@ export default function SearchPage() {
 
   return (
     <div className="container max-w-4xl mx-auto px-4 py-8 bg-muted">
- 
       <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} handleSearch={handleSearch} />
 
+      {/* Placeholder UI when no search term is entered */}
       {!searchTerm && (
         <div className="grid grid-cols-3 gap-4 mt-6">
           {[...Array(6)].map((_, index) => (
@@ -46,6 +47,8 @@ export default function SearchPage() {
 
       <div className="mt-6">
         {loading && <p className="text-gray-500">Loading...</p>}
+
+        {/* Displays search results if profiles exist */}
         {!loading && profiles.length > 0 ? (
           <ul className="bg-white rounded-lg shadow-md p-4">
             {profiles.map((profile, index) => (
@@ -64,6 +67,7 @@ export default function SearchPage() {
             ))}
           </ul>
         ) : searchTerm && !loading ? (
+          //Message displayed when no profiles are found after a search
           <p className="text-gray-500 mt-4">No profiles found.</p>
         ) : null}
       </div>

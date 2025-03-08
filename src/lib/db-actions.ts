@@ -52,16 +52,25 @@ export async function getProfileByID(id: string): Promise<Tables<"Profiles">> {
   return user
 }
 
-export async function getProjectByID(id: number): Promise<Tables<"Project">> {
-  const supabase = await createClient()
+export async function getProjectByID(id: string): Promise<Tables<"Project"> & { Profiles?: Tables<"Profiles"> } | null> {
+  const supabase = await createClient();
+
   const { data, error } = await supabase
     .from("Project")
-    .select("*")
+    .select(`
+      *,
+      Profiles:Profiles (username, avatar_url)
+    `)
     .eq("project_id", id)
-    .returns<Tables<"Project">>()
-  if (error) throw error
-  const project: Tables<"Project"> = data!
-  return project
+    .single();
+
+  if (error) {
+    console.error("Error fetching project:", error);
+    return null;
+  }
+
+  console.log("Fetched project from DB:", data);
+  return data;
 }
 
 export async function getPatternByID(id: string): Promise<Tables<"Patterns">> {

@@ -1,4 +1,5 @@
 import * as React from "react"
+
 import {
   AudioWaveform,
   Frame,
@@ -12,6 +13,7 @@ import {
 } from "lucide-react"
 
 import { NavUser } from "./nav-user"
+
 import {
   Sidebar,
   SidebarContent,
@@ -24,9 +26,11 @@ import {
   SidebarGroup,
   SidebarGroupLabel,
 } from "@/components/ui/sidebar"
+
 import { getCurrentUser } from "@/lib/auth-actions"
 import { getCurrentUserProfile } from "@/lib/db-actions"
 
+//Mock data for user profile and sidebar menu options
 const data = {
   user: {
     name: "shadcn",
@@ -77,13 +81,16 @@ const data = {
   ],
 }
 
+//Sidebar component for the application
 export async function AppSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
   const user = await getCurrentUser()
   const profile = await getCurrentUserProfile()
+
   return (
     <Sidebar collapsible="icon" {...props}>
+      {/* Sidebar header */}
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -100,6 +107,8 @@ export async function AppSidebar({
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
+      
+      {/* Sidebar content */}
       <SidebarContent>
         <SidebarGroup className="group-data-[collapsible=icon]:hidden">
           <SidebarGroupLabel>Application</SidebarGroupLabel>
@@ -117,9 +126,12 @@ export async function AppSidebar({
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
+      
+      {/* Sidebar footer */}
       <SidebarFooter>
         <NavUser profile={profile} />
       </SidebarFooter>
+      
       <SidebarRail />
     </Sidebar>
   )
