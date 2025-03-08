@@ -34,6 +34,7 @@ export default async function Profile({
 }: {
   params: Promise<{ profileId: string }>
 }) {
+    //Fetches user profile data
   const { profileId } = await params
   const profile = await getProfileByID(profileId)
   const currentUser = await getCurrentUser()
@@ -42,7 +43,7 @@ export default async function Profile({
   const projects = await getProjectsByUserID(profileId)
   return (
     <div className="container max-w-4xl mx-auto px-4 py-8 bg-muted">
-      {/* Profile Header */}
+      {/* Profile header */}
       <div className="flex flex-col md:flex-row gap-8 mb-8">
         <div className="flex justify-center md:justify-start">
           <Avatar className="h-24 w-24 md:h-36 md:w-36 border-2 border-background">
@@ -59,12 +60,14 @@ export default async function Profile({
           </Avatar>
         </div>
 
+        {/* User info section */}
         <div className="flex-1 space-y-4">
           <div className="flex flex-col md:flex-row md:items-center gap-4">
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-semibold">{profile.username}</h1>
             </div>
 
+            {/* Profile action btns */}
             <div className="flex gap-2 mt-2 md:mt-0 md:ml-auto">
               {isOwner ? (
                 <Link href="/settings">
@@ -126,7 +129,7 @@ export default async function Profile({
         </div>
       </div>
 
-      {/* Tabs and Content */}
+      {/* Tabs and content */}
       <Tabs defaultValue="posts" className="w-full">
         <TabsList className="w-full grid grid-cols-2">
           <TabsTrigger value="posts" className="flex items-center gap-2">
@@ -139,26 +142,29 @@ export default async function Profile({
           </TabsTrigger>
         </TabsList>
 
+        {/* User posts */}
         <TabsContent value="posts" className="mt-6">
           <div className="grid grid-cols-3 gap-1">
             {projects.map((project, i) => (
-              <div key={i} className="aspect-square relative group">
-                <Image
-                  src={project.images[0]}
-                  alt={project.title}
-                  fill
-                  className="object-cover"
-                />
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4 text-white">
-                  <div className="flex items-center gap-1">
-                    <MessageCircle className="h-5 w-5 fill-white" />
-                    <span className="font-semibold">
-                      {Math.floor(Math.random() * 100)}
-                    </span>
+              <Link key={i} href={`/home/projects/${project.project_id}`} passHref>
+              <div className="aspect-square relative group cursor-pointer">
+                    <Image
+                      src={project.images[0]}
+                      alt={project.title}
+                      fill
+                      className="object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4 text-white">
+                      <div className="flex items-center gap-1">
+                        <MessageCircle className="h-5 w-5 fill-white" />
+                        <span className="font-semibold">
+                          {Math.floor(Math.random() * 100)}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            ))}
+                </Link>
+              ))}
           </div>
         </TabsContent>
 
