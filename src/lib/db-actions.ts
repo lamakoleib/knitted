@@ -52,25 +52,29 @@ export async function getProfileByID(id: string): Promise<Tables<"Profiles">> {
   return user
 }
 
-export async function getProjectByID(id: string): Promise<Tables<"Project"> & { Profiles?: Tables<"Profiles"> } | null> {
-  const supabase = await createClient();
+export async function getProjectByID(
+  id: string
+): Promise<(Tables<"Project"> & { Profiles?: Tables<"Profiles"> }) | null> {
+  const supabase = await createClient()
 
   const { data, error } = await supabase
     .from("Project")
-    .select(`
+    .select(
+      `
       *,
       Profiles:Profiles (username, avatar_url)
-    `)
+    `
+    )
     .eq("project_id", id)
-    .single();
+    .single()
 
   if (error) {
-    console.error("Error fetching project:", error);
-    return null;
+    console.error("Error fetching project:", error)
+    return null
   }
 
-  console.log("Fetched project from DB:", data);
-  return data;
+  console.log("Fetched project from DB:", data)
+  return data
 }
 
 export async function getPatternByID(id: string): Promise<Tables<"Patterns">> {
@@ -490,6 +494,32 @@ export async function getFeedPosts(): Promise<FeedPost[]> {
   }
 
   return posts
+}
+
+export async function getPostDataByID(projectId: string): Promise<FeedPost> {
+  const supabase = await createClient()
+
+  const { data: post, error } = await supabase
+    .from("Project")
+    .select(
+      `
+      *,
+      Profiles:user_id (
+        id,
+        username,
+        avatar_url,
+        full_name
+      )
+      `
+    )
+    .eq("project_id", projectId)
+    .single()
+
+  if (error) {
+    console.error("Error fetching post:", error)
+  }
+
+  return post
 }
 
 export async function likePost(projectId: number) {
