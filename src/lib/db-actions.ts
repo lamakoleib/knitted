@@ -253,19 +253,35 @@ export async function getPatternsByUserID(
   return patterns
 }
 
-export async function getProjectsByUserID(
-  id: string
-): Promise<Tables<"Project">[]> {
-  const supabase = await createClient()
-  const { data, error } = await supabase
-    .from("Project")
-    .select("*")
-    .eq("user_id", id)
-    .returns<Tables<"Project">[]>()
-  if (error) throw error
-  const projects: Tables<"Project">[] = data!
-  return projects
+export async function getProjectsByUserID(userId: string) {
+  const supabase = await createClient();
+
+  //Fetches projects
+  const { data: projects, error: projectsError } = await supabase
+      .from("Project")
+      .select("project_id, title, images")
+      .eq("user_id", userId);
+  if (projectsError) {
+      console.error("Error fetching projects:", projectsError);
+      return [];
+  }
+  //Fetches comment counts for all projects
+  const projectsWithComments = await Promise.all(projects.map(async (project) => {
+      const { count, error: countError } = await supabase
+          .from("Comments")
+          .select("*", { count: "exact", head: true })
+          .eq("project_id", project.project_id);
+
+      if (countError) {
+          console.error(`Error fetching comment count for project ${project.project_id}:`, countError);
+          return { ...project, comment_count: 0 };
+      }
+
+      return { ...project, comment_count: count ?? 0 };
+  }));
+  return projectsWithComments;
 }
+
 
 export async function getCommentsByUserID(
   id: string
@@ -648,6 +664,21 @@ export async function addComment(projectId: number, comment: string) {
   }
 }
 
+export async function getCommentCountByPostID(projectId: number) {
+  const supabase = await createClient();
+
+  const { count, error } = await supabase
+      .from("Comments")
+      .select("*", { count: "exact", head: true })
+      .eq("project_id", projectId);
+
+  if (error) {
+      console.error("Error fetching comment count:", error);
+      return 0;
+  }
+  return count ?? 0;
+}
+
 export async function getComments(projectId: number) {
   const supabase = await createClient()
 
@@ -669,6 +700,7 @@ export async function getComments(projectId: number) {
     .order("created_at", { ascending: false })
 
   if (error) throw error
+
 
   return data.map((comment: any) => ({
     id: comment.comment_id,
