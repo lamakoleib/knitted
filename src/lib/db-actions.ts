@@ -16,28 +16,28 @@ type ActionResponse = {
 }
 
 export async function searchProfiles(searchTerm: string) {
-  if (searchTerm.trim().length < 2) return []
-  const supabase = await createClient()
-  const formattedSearchTerm = `%${searchTerm.trim()}%`
+  if (searchTerm.trim().length < 2) return [];
+  const supabase = await createClient();
+  const formattedSearchTerm = `%${searchTerm.trim()}%`;
 
-  console.log("Search Term:", formattedSearchTerm)
+  console.log("Search Term:", formattedSearchTerm);
 
   const { data, error } = await supabase
     .from("Profiles")
-    .select("id, full_name, username, email, follower_count")
+    .select("id, full_name, username, email, avatar_url, follower_count")
     .or(
       `full_name.ilike.${formattedSearchTerm}, username.ilike.${formattedSearchTerm}`
     )
-    .limit(10) //limit results to avoid excessive queries
+    .limit(10); //limit results to avoid excessive queries
 
-  console.log("Query Result:", data)
+  console.log("Query Result:", data);
 
   if (error) {
-    console.error("Error searching profiles:", error)
-    return []
+    console.error("Error searching profiles:", error);
+    return [];
   }
 
-  return data ?? []
+  return data ?? [];
 }
 
 export async function getProfileByID(id: string): Promise<Tables<"Profiles">> {
