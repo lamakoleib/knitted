@@ -3,7 +3,6 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Badge } from "@/components/ui/badge"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,9 +15,7 @@ import {
   Tag,
   MoreHorizontal,
   MessageCircle,
-  Settings,
   Ban,
-  CheckCircle2,
 } from "lucide-react"
 import {
   getProfileByID,
@@ -26,21 +23,21 @@ import {
   isFollowing,
 } from "@/lib/db-actions"
 import { getCurrentUser } from "@/lib/auth-actions"
-import Follow from "../components/follow-button"
-import Unfollow from "../components/unfollow-button"
+import FollowButton from "../components/follow-button"
 
 export default async function Profile({
   params,
 }: {
   params: Promise<{ profileId: string }>
 }) {
-    //Fetches user profile data
+  // Fetches user profile data
   const { profileId } = await params
   const profile = await getProfileByID(profileId)
   const currentUser = await getCurrentUser()
-  const isOwner = currentUser.user.id == profileId
+  const isOwner = currentUser.user.id === profileId
   const isFollower = await isFollowing(profileId)
   const projects = await getProjectsByUserID(profileId)
+
   return (
     <div className="container max-w-4xl mx-auto px-4 py-8 bg-muted">
       {/* Profile header */}
@@ -75,12 +72,15 @@ export default async function Profile({
                     Settings
                   </Button>
                 </Link>
-              ) : isFollower ? (
-                <Unfollow profileId={profileId} />
               ) : (
-                <Follow profileId={profileId} />
+                <FollowButton
+                  profileId={profileId}
+                  initialIsFollowing={isFollower}
+                  currentUserId={currentUser.user.id}
+                  followerCount={profile.follower_count ?? 0}
+                />
               )}
-              <Button variant="outline">Message</Button>
+              {!isOwner && <Button variant="outline">Message</Button>}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="icon" className="h-10 w-10">
@@ -146,25 +146,29 @@ export default async function Profile({
         <TabsContent value="posts" className="mt-6">
           <div className="grid grid-cols-3 gap-1">
             {projects.map((project, i) => (
-              <Link key={i} href={`/home/projects/${project.project_id}`} passHref>
-              <div className="aspect-square relative group cursor-pointer">
-                    <Image
-                      src={project.images[0]}
-                      alt={project.title}
-                      fill
-                      className="object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4 text-white">
-                      <div className="flex items-center gap-1">
-                        <MessageCircle className="h-5 w-5 fill-white" />
-                        <span className="font-semibold">
-                          {Math.floor(Math.random() * 100)}
-                        </span>
-                      </div>
+              <Link
+                key={i}
+                href={`/home/projects/${project.project_id}`}
+                passHref
+              >
+                <div className="aspect-square relative group cursor-pointer">
+                  <Image
+                    src={project.images[0] || "/placeholder.svg"}
+                    alt={project.title}
+                    fill
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4 text-white">
+                    <div className="flex items-center gap-1">
+                      <MessageCircle className="h-5 w-5 fill-white" />
+                      <span className="font-semibold">
+                        {Math.floor(Math.random() * 100)}
+                      </span>
                     </div>
                   </div>
-                </Link>
-              ))}
+                </div>
+              </Link>
+            ))}
           </div>
         </TabsContent>
 
