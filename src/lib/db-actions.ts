@@ -7,6 +7,7 @@ import { redirect } from "next/navigation"
 import { z } from "zod"
 import { projectSchema } from "@/types/schemas"
 import { FeedPost } from "@/types/feed"
+import { createServiceClient } from "@/utils/supabase/service"
 
 type ActionResponse = {
   success: boolean
@@ -309,49 +310,93 @@ export async function getPatternsByProjectID(
   return patterns
 }
 
-export async function insertFollower(profileId: string) {
+export async function follow(profileId: string) {
   const user = await getCurrentUser()
-  if (!user) {
-    console.log("Error: No User")
+  if (!user || !user.user?.id) return { error: "User not found" }
+
+  const supabase = await createClient()
+  const data = {
+    id: user.user.id,
+    profileId: profileId,
+  }
+
+  await enqueue("follow", data)
+  const { data: insertData, error } = await supabase
+    .from("Profiles")
+    .select("followed")
+    .eq("id", user.user.id)
+    .single()
+
+  if ((insertData?.followed || []).includes(profileId)) {
     return
   }
-  const supabase = await createClient()
+  const updatedFollowers = [...(insertData?.followed || []), profileId]
 
-  const { data, error } = await supabase
-    .from("Followers")
-    .insert({ user_id: user.user.id, followers_id: profileId })
-    .select()
-  if (error) {
-    throw error
-  }
-  console.log(data)
+  await supabase
+    .from("Profiles")
+    .update({ followed: updatedFollowers })
+    .eq("id", user.user.id)
 }
 
 export async function isFollowing(profileId: string): Promise<boolean> {
-  const user = await getCurrentUser()
-  const supabase = await createClient()
-  const { count, error } = await supabase
-    .from("Followers")
-    .select("*", { count: "exact", head: true }) // head: true returns only the count
-    .eq("user_id", user.user.id)
-    .eq("followers_id", profileId)
-  if (error) {
-    console.log(error)
+  try {
+    const user = await getCurrentUser()
+
+    if (!user || !user.user || !user.user.id) {
+      console.log("No authenticated user found")
+      return false
+    }
+
+    const supabase = await createClient()
+
+    const { data, error } = await supabase
+      .from("Profiles")
+      .select("followed")
+      .eq("id", user.user.id)
+      .single()
+
+    if (error) {
+      console.error("Error fetching profile:", error)
+      return false
+    }
+
+    if (!data || !data.followed) {
+      return false
+    }
+
+    return data.followed.includes(profileId)
+  } catch (err) {
+    console.error("Unexpected error in isFollowing:", err)
     return false
   }
-  return (count ?? 0) > 0
 }
 
 export async function unfollow(profileId: string) {
   const user = await getCurrentUser()
-  const supabase = await createClient()
-  const { error } = await supabase
-    .from("Followers")
-    .delete()
-    .eq("user_id", user.user.id)
-    .eq("followers_id", profileId)
+  if (!user || !user.user?.id) return { error: "User not found" }
 
-  if (error) throw error
+  const supabase = await createClient()
+
+  const data = {
+    id: user.user.id,
+    profileId: profileId,
+  }
+
+  await enqueue("unfollow", data)
+  const { data: insertData, error } = await supabase
+    .from("Profiles")
+    .select("followed")
+    .eq("id", user.user.id)
+    .single()
+
+  const updatedFollowers = (insertData?.followed || []).filter(
+    (id: string) => id != profileId
+  )
+
+  await supabase
+    .from("Profiles")
+    .update({ followed: updatedFollowers })
+    .eq("id", user.user.id)
 }
 
 export async function uploadProject(
@@ -678,4 +723,19 @@ export async function getComments(projectId: number) {
     username: comment.Profiles?.username || "Unknown User",
     avatar_url: comment.Profiles?.avatar_url,
   }))
+}
+
+export async function enqueue(action: string, data: Record<string, any>) {
+  const supabase = await createServiceClient()
+  const { error } = await supabase.schema("pgmq_public").rpc("send", {
+    queue_name: "profile_events",
+    message: { action, data },
+    sleep_seconds: 30,
+  })
+  if (error) {
+    console.log("Error adding to queue:", error)
+    return { success: false }
+  }
+
+  return { success: true }
 }
