@@ -279,12 +279,12 @@ export function ProfileForm({ profile }: ProfileFormProps) {
         <div className="flex justify-between">
           <Button 
             type="button" 
-            className="bg-red-300 text-primary-foreground hover:bg-red-300/90"
-            variant="outline" 
+            className="bg-red-300 text-primary-foreground hover:bg-red-300/90" 
             onClick={() => router.back()}
           >
             ← Go Back
           </Button>
+          
           <Button
             type="submit"
             disabled={isSubmitting}
