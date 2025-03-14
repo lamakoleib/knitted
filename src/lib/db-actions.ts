@@ -679,6 +679,23 @@ export async function getCommentCountByPostID(projectId: number) {
   return count ?? 0;
 }
 
+export async function updateProjectByID(projectId: string, updatedData: any) {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("Project")
+    .update(updatedData)
+    .eq("project_id", projectId);
+
+  if (error) {
+    console.error("Error updating project in Supabase:", error);
+    throw error;
+  }
+
+  console.log("Project updated successfully:", data);
+  return data;
+}
+
 export async function getComments(projectId: number) {
   const supabase = await createClient()
 
@@ -700,7 +717,6 @@ export async function getComments(projectId: number) {
     .order("created_at", { ascending: false })
 
   if (error) throw error
-
 
   return data.map((comment: any) => ({
     id: comment.comment_id,
