@@ -10,19 +10,21 @@ describe("db-actions", () => {
 		from: jest.fn(() => ({
 			select: jest.fn(() => ({
 				eq: jest.fn(() => ({
-					returns: jest.fn(() => ({
-						data: [],
+					single: jest.fn().mockResolvedValue({
+						data: null, 
 						error: null,
-					})),
+					}),
 				})),
 			})),
 		})),
-	}
+	};
+	
 
 	beforeEach(() => {
-		jest.clearAllMocks()
-		;(createClient as jest.Mock).mockResolvedValue(mockSupabaseClient)
-	})
+		jest.clearAllMocks();
+		(createClient as jest.Mock).mockReturnValue(mockSupabaseClient);
+	});
+	
 
 	it("fetches a user by ID", async () => {
 		const mockUser = {
@@ -33,24 +35,24 @@ describe("db-actions", () => {
 			bio: "Genius, billionaire, hero",
 			follower_count: 10,
 			following_count: 5,
-		}
-
-		;(mockSupabaseClient.from as jest.Mock).mockReturnValueOnce({
+		};
+	
+		(mockSupabaseClient.from as jest.Mock).mockReturnValue({
 			select: jest.fn(() => ({
 				eq: jest.fn(() => ({
-					returns: jest.fn(() => ({
-						data: [mockUser],
+					single: jest.fn().mockResolvedValue({
+						data: mockUser,
 						error: null,
-					})),
+					}),
 				})),
 			})),
-		})
-
-		const user = await dbActions.getProfileByID(1)
-
-		expect(createClient).toHaveBeenCalled()
-		expect(mockSupabaseClient.from).toHaveBeenCalledWith("Profiles")
-		expect(user).toEqual([mockUser])
+		});
+	
+		const user = await dbActions.getProfileByID("1");
+	
+		expect(createClient).toHaveBeenCalled();
+		expect(mockSupabaseClient.from).toHaveBeenCalledWith("Profiles");
+		expect(user).toEqual(mockUser);
 	})
 
 	it("fetches a project by ID", async () => {
@@ -61,25 +63,26 @@ describe("db-actions", () => {
 			created_at: "2025-01-01T12:00:00Z",
 			yarn_list: null,
 			yarrn_id: null,
-		}
-
-		;(mockSupabaseClient.from as jest.Mock).mockReturnValueOnce({
+		};
+	
+		(mockSupabaseClient.from as jest.Mock).mockReturnValue({
 			select: jest.fn(() => ({
 				eq: jest.fn(() => ({
-					returns: jest.fn(() => ({
-						data: [mockProject],
+					single: jest.fn().mockResolvedValue({
+						data: mockProject,
 						error: null,
-					})),
+					}),
 				})),
 			})),
-		})
-
-		const project = await dbActions.getProjectByID(1)
-
-		expect(createClient).toHaveBeenCalled()
-		expect(mockSupabaseClient.from).toHaveBeenCalledWith("Project")
-		expect(project).toEqual([mockProject])
-	})
+		});
+	
+		const project = await dbActions.getProjectByID('1');
+	
+		expect(createClient).toHaveBeenCalled();
+		expect(mockSupabaseClient.from).toHaveBeenCalledWith("Project");
+		expect(project).toEqual(mockProject);
+	});
+	
 
 	it("fetches a pattern by ID", async () => {
 		const mockPattern = {
@@ -159,17 +162,45 @@ describe("db-actions", () => {
 	})
 
 	it("throws an error if the query fails", async () => {
-		;(mockSupabaseClient.from as jest.Mock).mockReturnValueOnce({
+		(mockSupabaseClient.from as jest.Mock).mockReturnValue({
 			select: jest.fn(() => ({
 				eq: jest.fn(() => ({
-					returns: jest.fn(() => ({
+					single: jest.fn().mockResolvedValue({
 						data: null,
 						error: new Error("Query failed"),
-					})),
+					}),
 				})),
 			})),
-		})
-
-		await expect(dbActions.getProfileByID(1)).rejects.toThrow("Query failed")
+		});
+	
+		await expect(dbActions.getProfileByID("1")).rejects.toThrow("Query failed");
+	})	
+	it("handles fetching a user with no followers", async () => {
+		(mockSupabaseClient.from as jest.Mock).mockReturnValue({
+			select: jest.fn(() => ({
+				eq: jest.fn(() => ({
+					single: jest.fn().mockResolvedValue({
+						data: { follower_count: 0 },
+						error: null,
+					}),
+				})),
+			})),
+		});
+	
+		const user = await dbActions.getProfileByID("1");
+		expect(user.follower_count).toBe(0);
+	});
+	
+	it("throws an error when fetching a non-existent project", async () => {
+		(mockSupabaseClient.from as jest.Mock).mockReturnValue({
+			select: jest.fn(() => ({
+				eq: jest.fn(() => ({
+					single: jest.fn().mockResolvedValue({ data: null, error: new Error("Project not found") }),
+				})),
+			})),
+		});
+	
+		await expect(dbActions.getProjectByID("999")).rejects.toThrow("Project not found");
 	})
+	
 })
