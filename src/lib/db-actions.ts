@@ -68,9 +68,9 @@ export async function getProjectByID(
     .eq("project_id", id)
     .single()
 
-  if (error) {
-    console.error("Error fetching project:", error)
-    return null
+    if (error || !data) {
+      console.error("Error fetching project:", error || "Project not found");
+      throw new Error("Project not found");
   }
 
   console.log("Fetched project from DB:", data)
