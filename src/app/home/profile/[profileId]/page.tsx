@@ -158,7 +158,7 @@ export default async function Profile({
                       <div className="flex items-center gap-1">
                         <MessageCircle className="h-5 w-5 fill-white" />
                         <span className="font-semibold">
-                          {Math.floor(Math.random() * 100)}
+                          {project.comment_count}
                         </span>
                       </div>
                     </div>
@@ -170,7 +170,7 @@ export default async function Profile({
 
         <TabsContent value="tagged" className="mt-6">
           <div className="grid grid-cols-3 gap-1">
-            {Array.from({ length: 3 }).map((_, i) => (
+            {projects.map((project, i) => (
               <div key={i} className="aspect-square relative group">
                 <Image
                   src={`/placeholder.svg?height=300&width=300&text=Tagged${
@@ -184,7 +184,7 @@ export default async function Profile({
                   <div className="flex items-center gap-1">
                     <MessageCircle className="h-5 w-5 fill-white" />
                     <span className="font-semibold">
-                      {Math.floor(Math.random() * 100)}
+                      {project.comment_count}
                     </span>
                   </div>
                 </div>

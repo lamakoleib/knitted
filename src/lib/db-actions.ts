@@ -16,28 +16,28 @@ type ActionResponse = {
 }
 
 export async function searchProfiles(searchTerm: string) {
-  if (searchTerm.trim().length < 2) return []
-  const supabase = await createClient()
-  const formattedSearchTerm = `%${searchTerm.trim()}%`
+  if (searchTerm.trim().length < 2) return [];
+  const supabase = await createClient();
+  const formattedSearchTerm = `%${searchTerm.trim()}%`;
 
-  console.log("Search Term:", formattedSearchTerm)
+  console.log("Search Term:", formattedSearchTerm);
 
   const { data, error } = await supabase
     .from("Profiles")
-    .select("id, full_name, username, email, follower_count")
+    .select("id, full_name, username, email, avatar_url, follower_count")
     .or(
       `full_name.ilike.${formattedSearchTerm}, username.ilike.${formattedSearchTerm}`
     )
-    .limit(10) //limit results to avoid excessive queries
+    .limit(10); //limit results to avoid excessive queries
 
-  console.log("Query Result:", data)
+  console.log("Query Result:", data);
 
   if (error) {
-    console.error("Error searching profiles:", error)
-    return []
+    console.error("Error searching profiles:", error);
+    return [];
   }
 
-  return data ?? []
+  return data ?? [];
 }
 
 export async function getProfileByID(id: string): Promise<Tables<"Profiles">> {
@@ -253,19 +253,35 @@ export async function getPatternsByUserID(
   return patterns
 }
 
-export async function getProjectsByUserID(
-  id: string
-): Promise<Tables<"Project">[]> {
-  const supabase = await createClient()
-  const { data, error } = await supabase
-    .from("Project")
-    .select("*")
-    .eq("user_id", id)
-    .returns<Tables<"Project">[]>()
-  if (error) throw error
-  const projects: Tables<"Project">[] = data!
-  return projects
+export async function getProjectsByUserID(userId: string) {
+  const supabase = await createClient();
+
+  //Fetches projects
+  const { data: projects, error: projectsError } = await supabase
+      .from("Project")
+      .select("project_id, title, images")
+      .eq("user_id", userId);
+  if (projectsError) {
+      console.error("Error fetching projects:", projectsError);
+      return [];
+  }
+  //Fetches comment counts for all projects
+  const projectsWithComments = await Promise.all(projects.map(async (project) => {
+      const { count, error: countError } = await supabase
+          .from("Comments")
+          .select("*", { count: "exact", head: true })
+          .eq("project_id", project.project_id);
+
+      if (countError) {
+          console.error(`Error fetching comment count for project ${project.project_id}:`, countError);
+          return { ...project, comment_count: 0 };
+      }
+
+      return { ...project, comment_count: count ?? 0 };
+  }));
+  return projectsWithComments;
 }
+
 
 export async function getCommentsByUserID(
   id: string
@@ -646,6 +662,38 @@ export async function addComment(projectId: number, comment: string) {
     username: profileData.username,
     avatar_url: profileData.avatar_url,
   }
+}
+
+export async function getCommentCountByPostID(projectId: number) {
+  const supabase = await createClient();
+
+  const { count, error } = await supabase
+      .from("Comments")
+      .select("*", { count: "exact", head: true })
+      .eq("project_id", projectId);
+
+  if (error) {
+      console.error("Error fetching comment count:", error);
+      return 0;
+  }
+  return count ?? 0;
+}
+
+export async function updateProjectByID(projectId: string, updatedData: any) {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("Project")
+    .update(updatedData)
+    .eq("project_id", projectId);
+
+  if (error) {
+    console.error("Error updating project in Supabase:", error);
+    throw error;
+  }
+
+  console.log("Project updated successfully:", data);
+  return data;
 }
 
 export async function getComments(projectId: number) {
