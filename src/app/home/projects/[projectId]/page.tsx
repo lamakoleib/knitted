@@ -9,7 +9,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { MoreHorizontal, Bookmark, Ban, Pencil } from "lucide-react"
-
+/**
+ * Renders the project details page.
+ *
+ * Displays a single project's post content along with metadata such as yarn type,
+ * difficulty, needle size, status, tags, and more. If the user is the owner of the project,
+ * edit, archive, and delete options are shown via a dropdown menu.
+ *
+ * @param params - URL parameters containing the `projectId`.
+ * @returns The project detail view.
+ */
 export default async function ProjectDetailsPage({
   params,
 }: {
