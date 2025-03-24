@@ -2,7 +2,15 @@ import { type EmailOtpType } from "@supabase/supabase-js";
 import { type NextRequest, NextResponse } from "next/server";
 
 import { createClient } from "@/utils/supabase/server";
-
+/**
+ * Handles GET requests to verify an email OTP (one-time password).
+ *
+ * Extracts query parameters from the request URL, verifies the OTP token using Supabase,
+ * and redirects the user based on verification success or failure.
+ *
+ * @param request - The incoming Next.js request object.
+ * @returns A redirect response to the appropriate page based on OTP verification.
+ */
 export async function GET(request: NextRequest) {
 	const { searchParams } = new URL(request.url);
 	const token_hash = searchParams.get("token_hash");

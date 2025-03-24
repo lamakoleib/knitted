@@ -2,6 +2,15 @@ import { Volleyball } from "lucide-react";
 
 import { LoginForm } from "@/components/login-form";
 import { BackgroundLines } from "@/components/ui/background-lines";
+/**
+ * Renders the login page for the Knitted app.
+ *
+ * The page is divided into two columns on large screens:
+ * - Left: Logo and login form.
+ * - Right: A decorative background with the app name.
+ *
+ * @returns The login page layout.
+ */
 export default function LoginPage() {
 	return (
 		<div className="grid min-h-svh lg:grid-cols-2">

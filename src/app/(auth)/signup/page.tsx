@@ -2,6 +2,15 @@ import { Volleyball } from "lucide-react";
 
 import Signup from "@/components/signup-form";
 import { BackgroundLines } from "@/components/ui/background-lines";
+/**
+ * Renders the signup page for the Knitted app.
+ *
+ * The layout includes:
+ * - Left column: Logo and signup form.
+ * - Right column (large screens only): Visual background with app branding.
+ *
+ * @returns The signup page layout.
+ */
 
 export default function LoginPage() {
 	return (
