@@ -36,6 +36,16 @@ type Comment = {
   username: string
   avatar_url?: string
 }
+/**
+ * Displays a single post with image, user info, like/save functionality, and comments.
+ *
+ * Handles fetching post status (likes/saves/comments), toggling actions,
+ * and submitting new comments.
+ *
+ * @param post - The feed post data to display.
+ * @param profile - The current user's profile data.
+ * @returns A post card component with interactive features.
+ */
 
 export function PostCard({
   post,
@@ -63,7 +73,10 @@ export function PostCard({
   const [showAllComments, setShowAllComments] = useState(false)
   const [commentText, setCommentText] = useState("")
 
-  //Fetches comments from database
+  
+  /**
+   * Fetch comments from the database.
+   */
   const fetchComments = async () => {
     setIsLoadingComments(true)
     try {
@@ -77,7 +90,9 @@ export function PostCard({
     }
   }
 
-  //Toggles like status of the post
+  /**
+   * Toggle the like status of the post.
+   */
   const toggleLike = async () => {
     try {
       if (liked) {
@@ -92,8 +107,9 @@ export function PostCard({
       console.error("Error toggling like:", error)
     }
   }
-
-  //Toggles save status of the post
+   /**
+   * Toggle the save status of the post.
+   */
   const toggleSave = async () => {
     try {
       if (saved) {
@@ -107,7 +123,9 @@ export function PostCard({
     }
   }
 
-  //Handles adding a new comment
+  /**
+   * Add a new comment to the post.
+   */
   const handleAddComment = async () => {
     if (!commentText.trim()) return
 

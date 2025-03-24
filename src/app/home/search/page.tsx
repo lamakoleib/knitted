@@ -7,7 +7,17 @@ import SearchBar from "@/components/ui/search-bar";
 import { searchProfiles } from "@/lib/db-actions";
 import { type Tables } from "@/types/database.types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
+/**
+ * Renders the search page for finding user profiles.
+ *
+ * Features:
+ * - A search bar to input search terms
+ * - Placeholder UI when no search term is entered
+ * - Displays matching user profiles using `searchProfiles`
+ * - Shows loading state and fallback message if no results are found
+ *
+ * @returns The user search page
+ */
 export default function SearchPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [profiles, setProfiles] = useState<Partial<Tables<"Profiles">>[]>([]);

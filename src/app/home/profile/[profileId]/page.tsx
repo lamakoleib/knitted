@@ -29,6 +29,16 @@ import { getCurrentUser } from "@/lib/auth-actions"
 import Follow from "../components/follow-button"
 import Unfollow from "../components/unfollow-button"
 
+/**
+ * Renders a user profile page.
+ *
+ * Displays user information, profile image, stats, action buttons (follow, message),
+ * and a tabbed interface for viewing the user's projects or tagged content.
+ *
+ * @param params - Route parameters containing the `profileId` to load.
+ * @returns The profile page component.
+ */
+
 export default async function Profile({
   params,
 }: {
