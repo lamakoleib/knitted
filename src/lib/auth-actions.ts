@@ -5,6 +5,12 @@ import { redirect } from "next/navigation"
 
 import { createClient } from "@/utils/supabase/server"
 
+/**
+ * Signs in a user using Supabase credentials.
+ * Redirects to `/home` on success, or `/error` on failure.
+ *
+ * @param formData - Form data containing `email` and `password`.
+ */
 export async function login(formData: FormData) {
 	const supabase = await createClient()
 
@@ -27,6 +33,12 @@ export async function login(formData: FormData) {
 	redirect("/home")
 }
 
+/**
+ * Signs up a new user with email, password, and full name.
+ * On success, redirects to `/home`; otherwise redirects to `/error`.
+ *
+ * @param formData - Form data containing `first-name`, `last-name`, `email`, and `password`.
+ */
 export async function signup(formData: FormData) {
 	const supabase = await createClient()
 
@@ -53,6 +65,12 @@ export async function signup(formData: FormData) {
 	redirect("/home")
 }
 
+/**
+ * Retrieves the currently authenticated user from Supabase.
+ * Redirects to `/error` if there is a failure.
+ *
+ * @returns The current user session data.
+ */
 export async function getCurrentUser() {
 	const supabase = await createClient()
 	const { data, error } = await supabase.auth.getUser()
@@ -64,7 +82,10 @@ export async function getCurrentUser() {
 
 	return data
 }
-
+/**
+ * Signs out the current user from Supabase.
+ * Redirects to `/login` on success or `/error` on failure.
+ */
 export async function signout() {
 	const supabase = await createClient()
 	const { error } = await supabase.auth.signOut()
@@ -75,7 +96,10 @@ export async function signout() {
 
 	redirect("/login")
 }
-
+/**
+ * Initiates sign-in flow with Google using Supabase OAuth.
+ * Redirects to Google's auth URL on success or to `/error` on failure.
+ */
 export async function signInWithGoogle() {
 	const supabase = await createClient()
 	const { data, error } = await supabase.auth.signInWithOAuth({
