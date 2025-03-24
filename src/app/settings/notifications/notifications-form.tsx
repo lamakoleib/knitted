@@ -19,7 +19,10 @@ import {
 } from "@/components/ui/form"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Switch } from "@/components/ui/switch"
-
+/**
+ * Notification form schema.
+ * Defines validation rules for all notification-related fields using Zod.
+ */
 const notificationsFormSchema = z.object({
 	type: z.enum(["all", "mentions", "none"], {
 		required_error: "You need to select a notification type.",
@@ -30,9 +33,14 @@ const notificationsFormSchema = z.object({
 	marketing_emails: z.boolean().default(false).optional(),
 	security_emails: z.boolean(),
 })
-
+/**
+ * Infer form values from the schema.
+ */
 type NotificationsFormValues = z.infer<typeof notificationsFormSchema>
-
+/**
+ * Default values for the form fields.
+ * These may typically come from the user's saved settings.
+ */
 // This can come from your database or API.
 const defaultValues: Partial<NotificationsFormValues> = {
 	communication_emails: false,
@@ -40,13 +48,25 @@ const defaultValues: Partial<NotificationsFormValues> = {
 	social_emails: true,
 	security_emails: true,
 }
-
+/**
+ * Renders a notifications settings form.
+ *
+ * Allows users to:
+ * - Select when they receive notifications (all, mentions, none)
+ * - Toggle different types of email notifications
+ *
+ * Form is validated using Zod and managed with React Hook Form.
+ */
 export function NotificationsForm() {
 	const form = useForm<NotificationsFormValues>({
 		resolver: zodResolver(notificationsFormSchema),
 		defaultValues,
 	})
-
+  /**
+   * Handles form submission and displays submitted values in a toast.
+   *
+   * @param data - The form values submitted by the user
+   */
 	function onSubmit(data: NotificationsFormValues) {
 		toast({
 			title: "You submitted the following values:",

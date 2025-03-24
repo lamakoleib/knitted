@@ -1,6 +1,15 @@
 import { Separator } from "@/components/ui/separator";
 import { DisplayForm } from "./display-form";
-
+/**
+ * Settings page for customizing displayed sidebar items.
+ *
+ * Renders:
+ * - A heading and description about display preferences
+ * - A separator line
+ * - The `DisplayForm` component for selecting which items appear in the sidebar
+ *
+ * @returns The display settings page layout.
+ */
 export default function SettingsDisplayPage() {
 	return (
 		<div className="space-y-6">

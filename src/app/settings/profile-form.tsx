@@ -57,7 +57,20 @@ type ProfileFormValues = z.infer<typeof profileFormSchema>
 interface ProfileFormProps {
   profile: Tables<"Profiles">
 }
-
+/**
+ * A form component for editing the current user's public profile.
+ *
+ * This form allows the user to:
+ * - Update their username (2–30 characters)
+ * - Edit their bio (4–160 characters)
+ * - Upload or remove a profile picture (JPG, PNG, or WebP, max 5MB)
+ *
+ * The component uses Zod for schema validation and `react-hook-form` for form handling.
+ * Submitted data is packaged as `FormData` and sent to the `updateProfile` function.
+ *
+ * @param profile - The user's existing profile data retrieved from the database.
+ * @returns A form UI for updating the user's profile information.
+ */
 export function ProfileForm({ profile }: ProfileFormProps) {
   const avatarUrl = profile.avatar_url
   const defaultValues = {
