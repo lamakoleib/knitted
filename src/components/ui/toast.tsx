@@ -7,8 +7,16 @@ import { X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Context provider for managing toast state and animations.
+ * Wrap your app or component tree with this to enable toasts.
+ */
 const ToastProvider = ToastPrimitives.Provider
 
+/**
+ * Container that holds and positions all toast notifications.
+ * Appears in bottom-right on desktop and top on mobile.
+ */
 const ToastViewport = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Viewport>,
   React.ComponentPropsWithoutRef<typeof ToastPrimitives.Viewport>
@@ -39,7 +47,11 @@ const toastVariants = cva(
     },
   }
 )
-
+/**
+ * The main Toast notification component.
+ *
+ * @param variant - Visual style: "default" | "destructive"
+ */
 const Toast = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Root>,
   React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> &
@@ -55,6 +67,10 @@ const Toast = React.forwardRef<
 })
 Toast.displayName = ToastPrimitives.Root.displayName
 
+/**
+ * Optional action button shown within the toast.
+ * Can be used for undo, retry, etc.
+ */
 const ToastAction = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Action>,
   React.ComponentPropsWithoutRef<typeof ToastPrimitives.Action>
@@ -70,6 +86,10 @@ const ToastAction = React.forwardRef<
 ))
 ToastAction.displayName = ToastPrimitives.Action.displayName
 
+/**
+ * Close button positioned at the top-right of the toast.
+ * Automatically dismisses the toast when clicked.
+ */
 const ToastClose = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Close>,
   React.ComponentPropsWithoutRef<typeof ToastPrimitives.Close>
@@ -100,6 +120,9 @@ const ToastTitle = React.forwardRef<
 ))
 ToastTitle.displayName = ToastPrimitives.Title.displayName
 
+/**
+ * Optional descriptive text shown below the toast title.
+ */
 const ToastDescription = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Description>,
   React.ComponentPropsWithoutRef<typeof ToastPrimitives.Description>

@@ -5,6 +5,12 @@ import * as SliderPrimitive from "@radix-ui/react-slider"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * A customizable range slider built on Radix UI.
+ * Supports keyboard, mouse, and touch interactions.
+ *
+ * @param className - Optional custom styling classes
+ */
 const Slider = React.forwardRef<
   React.ElementRef<typeof SliderPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root>

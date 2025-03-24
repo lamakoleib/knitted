@@ -11,6 +11,13 @@ import {
 import Link from "next/link"
 import { useRef, useState } from "react"
 
+/**
+ * FloatingDock component that renders desktop version of the dock.
+ *
+ * @param items - Array of dock items with title, icon, and href.
+ * @param desktopClassName - Optional class name for the desktop dock.
+ * @param mobileClassName - Optional class name for the mobile dock.
+ */
 export const FloatingDock = ({
   items,
   desktopClassName,
@@ -27,7 +34,12 @@ export const FloatingDock = ({
     </>
   )
 }
-
+/**
+ * Mobile version of the floating dock.
+ *
+ * @param items - Array of dock items.
+ * @param className - Optional wrapper class name.
+ */
 const FloatingDockMobile = ({
   items,
   className,
@@ -82,7 +94,12 @@ const FloatingDockMobile = ({
     </div>
   )
 }
-
+/**
+ * Desktop version of the floating dock with animated icon scaling.
+ *
+ * @param items - List of icons to render.
+ * @param className - Optional class for styling.
+ */
 const FloatingDockDesktop = ({
   items,
   className,
@@ -106,7 +123,14 @@ const FloatingDockDesktop = ({
     </motion.div>
   )
 }
-
+/**
+ * Single animated icon in the desktop floating dock. Resizes based on cursor proximity.
+ *
+ * @param mouseX - Motion value of the current mouse X position.
+ * @param title - Tooltip label for the icon.
+ * @param icon - The icon node to render.
+ * @param href - Link destination.
+ */
 function IconContainer({
   mouseX,
   title,

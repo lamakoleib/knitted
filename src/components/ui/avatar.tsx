@@ -4,7 +4,16 @@ import * as React from "react";
 import * as AvatarPrimitive from "@radix-ui/react-avatar";
 
 import { cn } from "@/lib/utils";
-
+/**
+ * The main Avatar component.
+ *
+ * Wraps Radix UI's `AvatarPrimitive.Root` to create a circular container for profile images.
+ * Typically used with `AvatarImage` and `AvatarFallback`.
+ *
+ * @param props - Props passed to the Radix Avatar root.
+ * @param props.className - Optional Tailwind class names for custom styling.
+ * @returns A circular avatar wrapper.
+ */
 const Avatar = React.forwardRef<
 	React.ElementRef<typeof AvatarPrimitive.Root>,
 	React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root>
@@ -20,6 +29,14 @@ const Avatar = React.forwardRef<
 ));
 Avatar.displayName = AvatarPrimitive.Root.displayName;
 
+/**
+ * The Avatar image component.
+ *
+ * Wraps Radix UI's `AvatarPrimitive.Image`, used to display a profile picture inside the avatar.
+ *
+ * @param props - Props passed to the Radix Avatar image.
+ * @returns An image that fills the avatar circle.
+ */
 const AvatarImage = React.forwardRef<
 	React.ElementRef<typeof AvatarPrimitive.Image>,
 	React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Image>
@@ -31,7 +48,14 @@ const AvatarImage = React.forwardRef<
 	/>
 ));
 AvatarImage.displayName = AvatarPrimitive.Image.displayName;
-
+/**
+ * The fallback UI when an image cannot be loaded.
+ *
+ * Wraps Radix UI's `AvatarPrimitive.Fallback`. Commonly used to display initials or an icon.
+ *
+ * @param props - Props passed to the Radix Avatar fallback.
+ * @returns A fallback view when no image is available.
+ */
 const AvatarFallback = React.forwardRef<
 	React.ElementRef<typeof AvatarPrimitive.Fallback>,
 	React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Fallback>

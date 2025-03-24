@@ -5,6 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import { useEffect } from "react";
 
+/**
+ * SearchBar component with input and button.
+ * Debounces input changes and triggers `handleSearch` after 500ms.
+ *
+ * @param searchTerm - Current search query value.
+ * @param setSearchTerm - Setter function for updating the search term.
+ * @param handleSearch - Function to execute the search logic.
+ */
 export default function SearchBar({ searchTerm, setSearchTerm, handleSearch }: { 
   searchTerm: string; 
   setSearchTerm: (term: string) => void; 

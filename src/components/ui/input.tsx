@@ -2,6 +2,13 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
+/**
+ * A styled input component with default styles and full accessibility support.
+ *
+ * @param className - Optional additional classes to override styling.
+ * @param type - Input type (e.g., text, password, email, etc).
+ * @param props - All other standard input props.
+ */
 const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
 	({ className, type, ...props }, ref) => {
 		return (

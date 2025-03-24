@@ -15,6 +15,11 @@ const SheetClose = SheetPrimitive.Close
 
 const SheetPortal = SheetPrimitive.Portal
 
+/**
+ * The overlay background displayed behind the sheet.
+ *
+ * @param className - Optional styling classes.
+ */
 const SheetOverlay = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Overlay>,
   React.ComponentPropsWithoutRef<typeof SheetPrimitive.Overlay>
@@ -53,6 +58,13 @@ interface SheetContentProps
   extends React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content>,
     VariantProps<typeof sheetVariants> {}
 
+/**
+ * Main content area of the sheet, rendered on the specified side with animation.
+ *
+ * @param side - The side from which the sheet should appear (default: "right").
+ * @param className - Optional styling overrides.
+ * @param children - Content to render inside the sheet.
+ */
 const SheetContent = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Content>,
   SheetContentProps
@@ -74,6 +86,11 @@ const SheetContent = React.forwardRef<
 ))
 SheetContent.displayName = SheetPrimitive.Content.displayName
 
+/**
+ * Header section of the sheet. Usually contains title/description.
+ *
+ * @param className - Optional styling.
+ */
 const SheetHeader = ({
   className,
   ...props
@@ -88,6 +105,11 @@ const SheetHeader = ({
 )
 SheetHeader.displayName = "SheetHeader"
 
+/**
+ * Footer section of the sheet. Usually used for action buttons.
+ *
+ * @param className - Optional styling.
+ */
 const SheetFooter = ({
   className,
   ...props
@@ -102,6 +124,11 @@ const SheetFooter = ({
 )
 SheetFooter.displayName = "SheetFooter"
 
+/**
+ * Title of the sheet, used inside the header.
+ *
+ * @param className - Optional styling.
+ */
 const SheetTitle = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Title>,
   React.ComponentPropsWithoutRef<typeof SheetPrimitive.Title>
@@ -114,6 +141,11 @@ const SheetTitle = React.forwardRef<
 ))
 SheetTitle.displayName = SheetPrimitive.Title.displayName
 
+/**
+ * Optional description shown below the title in the sheet.
+ *
+ * @param className - Optional styling.
+ */
 const SheetDescription = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Description>,
   React.ComponentPropsWithoutRef<typeof SheetPrimitive.Description>

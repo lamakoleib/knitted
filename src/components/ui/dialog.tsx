@@ -6,14 +6,28 @@ import { X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Root component for the dialog. Controls open/close state.
+ */
 const Dialog = DialogPrimitive.Root
-
+/**
+ * Trigger component that opens the dialog when clicked.
+ */
 const DialogTrigger = DialogPrimitive.Trigger
-
+/**
+ * Portal component used to render dialog elements outside the DOM hierarchy.
+ */
 const DialogPortal = DialogPrimitive.Portal
-
+/**
+ * Component that closes the dialog when triggered.
+ */
 const DialogClose = DialogPrimitive.Close
 
+/**
+ * Overlay rendered behind the dialog. Fades in/out on open/close.
+ *
+ * @param className - Optional custom classes to override styles.
+ */
 const DialogOverlay = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Overlay>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
@@ -29,6 +43,12 @@ const DialogOverlay = React.forwardRef<
 ))
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
 
+/**
+ * Main dialog content wrapper, centered on the screen with animations.
+ *
+ * @param children - Elements to render inside the dialog.
+ * @param className - Optional className for additional styling.
+ */
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
@@ -53,6 +73,11 @@ const DialogContent = React.forwardRef<
 ))
 DialogContent.displayName = DialogPrimitive.Content.displayName
 
+/**
+ * Header section of the dialog, used for titles and introductory text.
+ *
+ * @param className - Optional styling classes.
+ */
 const DialogHeader = ({
   className,
   ...props
@@ -67,6 +92,11 @@ const DialogHeader = ({
 )
 DialogHeader.displayName = "DialogHeader"
 
+/**
+ * Footer section of the dialog, typically used for actions or buttons.
+ *
+ * @param className - Optional styling classes.
+ */
 const DialogFooter = ({
   className,
   ...props
@@ -81,6 +111,11 @@ const DialogFooter = ({
 )
 DialogFooter.displayName = "DialogFooter"
 
+/**
+ * Dialog title, usually placed in the header. Semantically a heading.
+ *
+ * @param className - Optional styling classes.
+ */
 const DialogTitle = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Title>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
@@ -96,6 +131,11 @@ const DialogTitle = React.forwardRef<
 ))
 DialogTitle.displayName = DialogPrimitive.Title.displayName
 
+/**
+ * Description text that appears under the title.
+ *
+ * @param className - Optional styling classes.
+ */
 const DialogDescription = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Description>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>

@@ -3,6 +3,14 @@ import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import React from "react";
 
+/**
+ * Renders a full-width and full-height container with animated SVG lines
+ * in the background and optional child content.
+ *
+ * @param children - The content to be rendered on top of the background lines.
+ * @param className - Optional CSS class to customize the wrapper.
+ * @param svgOptions - Optional configuration for animation duration.
+ */
 export const BackgroundLines = ({
 	children,
 	className,
@@ -35,7 +43,12 @@ const pathVariants = {
 		opacity: [0, 1, 1, 0],
 	},
 };
-
+/**
+ * Internal component rendering animated SVG paths.
+ *
+ * @param svgOptions - Optional configuration for animation duration.
+ * @returns SVG element with repeated animated paths.
+ */
 const SVG = ({
 	svgOptions,
 }: {

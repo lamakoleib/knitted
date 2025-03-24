@@ -6,6 +6,12 @@ import { Circle } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Wrapper component for a group of radio inputs.
+ *
+ * @param className - Optional styling for the radio group container.
+ * @param props - All standard props from Radix's RadioGroup.Root.
+ */
 const RadioGroup = React.forwardRef<
   React.ElementRef<typeof RadioGroupPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Root>
@@ -20,6 +26,12 @@ const RadioGroup = React.forwardRef<
 })
 RadioGroup.displayName = RadioGroupPrimitive.Root.displayName
 
+/**
+ * A single radio input styled as a circular selector with an indicator.
+ *
+ * @param className - Optional styling for the radio item.
+ * @param props - All standard props from Radix's RadioGroup.Item.
+ */
 const RadioGroupItem = React.forwardRef<
   React.ElementRef<typeof RadioGroupPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Item>

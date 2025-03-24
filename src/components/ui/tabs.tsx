@@ -5,8 +5,16 @@ import * as TabsPrimitive from "@radix-ui/react-tabs"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Root wrapper for the tab component group.
+ * Manages tab state and active tab selection.
+ */
 const Tabs = TabsPrimitive.Root
 
+/**
+ * Container for tab triggers.
+ * Acts as the visual navigation bar for switching tabs.
+ */
 const TabsList = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.List>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
@@ -21,6 +29,10 @@ const TabsList = React.forwardRef<
   />
 ))
 TabsList.displayName = TabsPrimitive.List.displayName
+
+/**
+ * A clickable tab trigger used to switch between tab contents.
+ */
 
 const TabsTrigger = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Trigger>,
@@ -37,6 +49,9 @@ const TabsTrigger = React.forwardRef<
 ))
 TabsTrigger.displayName = TabsPrimitive.Trigger.displayName
 
+/**
+ * Content panel displayed when its corresponding tab is active.
+ */
 const TabsContent = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content>
