@@ -11,6 +11,11 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Heart, MessageCircle, Plus } from "lucide-react"
 
+/**
+ * Renders a post preview card with an image, user avatar, action icons, and placeholder content.
+ *
+ * Used to display feed-style post content with minimal interaction UI.
+ */
 export default function PostCard() {
   return (
     <Card className="w-[350px]">

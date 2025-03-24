@@ -7,6 +7,12 @@ import Link from "next/link";
 import { login, signInWithGoogle } from "@/lib/auth-actions";
 import Form from "next/form";
 
+/**
+ * Login form component that supports email/password login
+ * and Google OAuth sign-in using server actions.
+ *
+ * @param className - Optional className for styling the form wrapper
+ */
 export function LoginForm({
 	className,
 	...props
