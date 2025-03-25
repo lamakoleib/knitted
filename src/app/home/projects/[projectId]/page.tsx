@@ -51,15 +51,14 @@ export default async function ProjectDetailsPage({
                       </div>
                     </Link>
                   </DropdownMenuItem>
-
                   <DropdownMenuItem asChild>
-                    <Link href={`/home/projects/${project.project_id}/delete`}>
-                      <div className="flex items-center text-red-600">
-                        <Ban className="mr-2 h-4 w-4" />
-                        Delete Post
-                      </div>
-                    </Link>
-                  </DropdownMenuItem>
+                  <Link href={`/home/projects/${project.project_id}/delete`}>
+                    <div className="text-red-600 flex items-center cursor-pointer">
+                      <Ban className="mr-2 h-4 w-4" />
+                      Delete Post
+                    </div>
+                  </Link>
+                </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
