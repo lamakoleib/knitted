@@ -727,3 +727,41 @@ export async function getComments(projectId: number) {
     avatar_url: comment.Profiles?.avatar_url,
   }))
 }
+export async function deleteProjectByID(projectId: string) {
+  const supabase = await createClient()
+
+  // Delete from Likes
+  const { error: likesError } = await supabase
+    .from("Likes")
+    .delete()
+    .eq("project_id", projectId)
+
+  if (likesError) {
+    console.error("Error deleting Likes:", likesError)
+    throw new Error("Failed to delete related Likes")
+  }
+
+  // Delete from Comments
+  const { error: commentsError } = await supabase
+    .from("Comments")
+    .delete()
+    .eq("project_id", projectId)
+
+  if (commentsError) {
+    console.error("Error deleting Comments:", commentsError)
+    throw new Error("Failed to delete related Comments")
+  }
+
+  // Delete from Project
+  const { error: projectError } = await supabase
+    .from("Project")
+    .delete()
+    .eq("project_id", projectId)
+
+  if (projectError) {
+    console.error("Error deleting project:", projectError)
+    throw new Error("Failed to delete project")
+  }
+}
+
+
