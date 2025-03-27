@@ -6,108 +6,78 @@ jest.mock("@/utils/supabase/server", () => ({
 }));
 
 describe("Like Actions", () => {
-  let mockSupabaseClient: any;
+  let mockInsert: jest.Mock;
+  let mockDelete: jest.Mock;
+  let mockSelect: jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
 
-    mockSupabaseClient = {
-      from: jest.fn(() => ({
-        insert: jest.fn(() => Promise.resolve({ data: null, error: null })),
-        delete: jest.fn(() => ({
-          eq: jest.fn(() => ({
-            eq: jest.fn(() => Promise.resolve({ data: null, error: null })),
-          })),
-        })),
-        select: jest.fn(() => ({
-          eq: jest.fn(() => ({
-            eq: jest.fn(() => Promise.resolve({ count: 1, error: null })),
-          })),
-        })),
-      })),
+    mockInsert = jest.fn().mockResolvedValue({ data: null, error: null });
+    mockDelete = jest.fn().mockResolvedValue({ data: null, error: null });
+    mockSelect = jest.fn().mockResolvedValue({ count: 1, error: null });
+
+    const mockFrom = jest.fn((tableName: string) => {
+      if (tableName === "Likes") {
+        return {
+          insert: mockInsert,
+          delete: () => ({
+            eq: () => ({
+              eq: mockDelete,
+            }),
+          }),
+          select: () => ({
+            eq: () => ({
+              eq: mockSelect,
+            }),
+          }),
+        };
+      }
+      return {};
+    });
+
+    (createClient as jest.Mock).mockReturnValue({
+      from: mockFrom,
       auth: {
         getUser: jest.fn().mockResolvedValue({
           data: { user: { id: "123" } },
           error: null,
         }),
       },
-    };
-
-    (createClient as jest.Mock).mockReturnValue(mockSupabaseClient);
+    });
   });
 
   it("likes a post", async () => {
-    await expect(dbActions.likePost(1)).resolves.not.toThrow();
-    expect(mockSupabaseClient.from).toHaveBeenCalledWith("Likes");
-    expect(mockSupabaseClient.from().insert).toHaveBeenCalledWith({
+    await dbActions.likePost(1);
+    expect(mockInsert).toHaveBeenCalledWith({
       project_id: 1,
       user_id: "123",
     });
   });
 
   it("unlikes a post", async () => {
-    await expect(dbActions.unlikePost(1)).resolves.not.toThrow();
-    expect(mockSupabaseClient.from).toHaveBeenCalledWith("Likes");
-    expect(mockSupabaseClient.from().delete).toHaveBeenCalled();
+    await dbActions.unlikePost(1);
+    expect(mockDelete).toHaveBeenCalled();
   });
 
   it("checks if a post is liked", async () => {
     const isLiked = await dbActions.isLiked(1);
     expect(isLiked).toBe(true);
-    expect(mockSupabaseClient.from).toHaveBeenCalledWith("Likes");
+    expect(mockSelect).toHaveBeenCalled();
   });
 
   it("handles error when liking a post", async () => {
-    mockSupabaseClient.from.mockReturnValue({
-      insert: jest.fn(() => Promise.resolve({ data: null, error: new Error("Like failed") })),
-      delete: jest.fn(() => ({
-        eq: jest.fn(() => ({
-          eq: jest.fn(() => Promise.resolve({ data: null, error: null })),
-        })),
-      })),
-      select: jest.fn(() => ({
-        eq: jest.fn(() => ({
-          eq: jest.fn(() => Promise.resolve({ count: 1, error: null })),
-        })),
-      })),
-    });
-
+    mockInsert.mockResolvedValueOnce({ data: null, error: new Error("Like failed") });
     await expect(dbActions.likePost(1)).rejects.toThrow("Like failed");
   });
 
   it("handles error when unliking a post", async () => {
-    mockSupabaseClient.from.mockReturnValue({
-      insert: jest.fn(() => Promise.resolve({ data: null, error: null })),
-      delete: jest.fn(() => ({
-        eq: jest.fn(() => ({
-          eq: jest.fn(() => Promise.resolve({ data: null, error: new Error("Unlike failed") })),
-        })),
-      })),
-      select: jest.fn(() => ({
-        eq: jest.fn(() => ({
-          eq: jest.fn(() => Promise.resolve({ count: 1, error: null })),
-        })),
-      })),
-    });
-
+    mockDelete.mockResolvedValueOnce({ data: null, error: new Error("Unlike failed") });
     await expect(dbActions.unlikePost(1)).rejects.toThrow("Unlike failed");
   });
 
   it("handles error when checking if a post is liked", async () => {
-    mockSupabaseClient.from.mockReturnValue({
-      insert: jest.fn(() => Promise.resolve({ data: null, error: null })),
-      delete: jest.fn(() => ({
-        eq: jest.fn(() => ({
-          eq: jest.fn(() => Promise.resolve({ data: null, error: null })),
-        })),
-      })),
-      select: jest.fn(() => ({
-        eq: jest.fn(() => ({
-          eq: jest.fn(() => Promise.resolve({ count: null, error: new Error("Check failed") })),
-        })),
-      })),
-    });
-
+    mockSelect.mockResolvedValueOnce({ count: null, error: new Error("Check failed") });
     await expect(dbActions.isLiked(1)).resolves.toBe(false);
   });
 });
