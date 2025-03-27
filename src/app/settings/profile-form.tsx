@@ -5,6 +5,8 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { Camera, X } from "lucide-react"
+import { useRouter } from "next/navigation"; 
+
 
 import { toast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button"
@@ -59,6 +61,7 @@ interface ProfileFormProps {
 }
 
 export function ProfileForm({ profile }: ProfileFormProps) {
+  const router = useRouter();
   const avatarUrl = profile.avatar_url
   const defaultValues = {
     username: profile.username ?? "",
@@ -273,13 +276,22 @@ export function ProfileForm({ profile }: ProfileFormProps) {
             />
           </div>
         </div>
-        <div className="flex justify-end">
-        <Button
-          type="submit"
-          disabled={isSubmitting}
-          className="bg-red-300 text-primary-foreground hover:bg-red-300/90">
-          {isSubmitting ? "Updating..." : "Update profile"}
-        </Button>
+        <div className="flex justify-between">
+          <Button 
+            type="button" 
+            className="bg-red-300 text-primary-foreground hover:bg-red-300/90" 
+            onClick={() => router.back()}
+          >
+            ← Go Back
+          </Button>
+          
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="bg-red-300 text-primary-foreground hover:bg-red-300/90"
+          >
+            {isSubmitting ? "Updating..." : "Update profile"}
+          </Button>
         </div>
       </form>
     </Form>
