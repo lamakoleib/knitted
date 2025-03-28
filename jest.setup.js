@@ -1,3 +1,12 @@
+import { TextEncoder, TextDecoder } from "util";
+
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;
+
+global.Request = jest.fn();
+global.Response = jest.fn();
+global.Headers = jest.fn();
+
 import '@testing-library/jest-dom/extend-expect';
 
 beforeAll(() => {
