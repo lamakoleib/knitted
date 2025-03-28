@@ -35,7 +35,17 @@ const sidebarNavItems = [
 interface SettingsLayoutProps {
 	children: React.ReactNode;
 }
-
+/**
+ * Layout for user settings pages.
+ *
+ * This layout provides a sidebar navigation and a content area
+ * for profile-related forms (e.g., account, appearance, notifications).
+ * It is used to structure the UI for `/profile/*` routes.
+ *
+ * @param props - The layout props.
+ * @param props.children - The settings page content to display inside the layout.
+ * @returns The settings layout with sidebar and form content.
+ */
 export default function SettingsLayout({ children }: SettingsLayoutProps) {
 	return (
 		<>

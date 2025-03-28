@@ -56,7 +56,15 @@ type DisplayFormValues = z.infer<typeof displayFormSchema>;
 const defaultValues: Partial<DisplayFormValues> = {
 	items: ["recents", "home"],
 };
-
+/**
+ * Renders a form for configuring sidebar display preferences.
+ *
+ * Allows users to select which items should appear
+ * in their sidebar using checkboxes. Validates that at least one item is selected.
+ * Submission behavior displays selected values in a toast.
+ *
+ * @returns The sidebar display preferences form component.
+ */
 export function DisplayForm() {
 	const form = useForm<DisplayFormValues>({
 		resolver: zodResolver(displayFormSchema),

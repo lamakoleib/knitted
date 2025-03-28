@@ -117,7 +117,17 @@ const formSchema = z.object({
   isPublic: z.boolean().default(true),
   tags: z.string().optional(),
 })
-
+/**
+ * Renders a form for uploading a new knitting project.
+ *
+ * Includes:
+ * - Image uploader with previews and a 5-image limit
+ * - Inputs for project title, description, yarn types, pattern, needle size, difficulty, status, time spent, tags, and visibility
+ * - Form validation using Zod and react-hook-form
+ * - Submission to the database via `uploadProject`
+ *
+ * @returns The complete project upload form UI
+ */
 export default function ProjectUploadForm() {
   const [images, setImages] = useState<File[]>([])
   const [imageUrls, setImageUrls] = useState<string[]>([])

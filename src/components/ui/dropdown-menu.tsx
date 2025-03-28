@@ -6,18 +6,31 @@ import { Check, ChevronRight, Circle } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+/** Root component for the dropdown menu. */
 const DropdownMenu = DropdownMenuPrimitive.Root
 
+/** Element that toggles the dropdown. */
 const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger
 
+/** Groups dropdown items together. */
 const DropdownMenuGroup = DropdownMenuPrimitive.Group
 
+/** Renders dropdown in a portal. */
 const DropdownMenuPortal = DropdownMenuPrimitive.Portal
 
+/** Wrapper for nested dropdown menus. */
 const DropdownMenuSub = DropdownMenuPrimitive.Sub
 
+/** Groups radio items to allow only one selection. */
 const DropdownMenuRadioGroup = DropdownMenuPrimitive.RadioGroup
 
+/**
+ * Trigger for a nested dropdown submenu.
+ *
+ * @param inset - Adds left padding for nested alignment.
+ * @param className - Additional CSS classes.
+ * @param children - Label or content inside the trigger.
+ */
 const DropdownMenuSubTrigger = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.SubTrigger>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubTrigger> & {
@@ -39,7 +52,11 @@ const DropdownMenuSubTrigger = React.forwardRef<
 ))
 DropdownMenuSubTrigger.displayName =
   DropdownMenuPrimitive.SubTrigger.displayName
-
+/**
+ * Content container for a nested submenu.
+ *
+ * @param className - Optional styling classes.
+ */
 const DropdownMenuSubContent = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.SubContent>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubContent>
@@ -55,7 +72,12 @@ const DropdownMenuSubContent = React.forwardRef<
 ))
 DropdownMenuSubContent.displayName =
   DropdownMenuPrimitive.SubContent.displayName
-
+/**
+ * Main content container for the dropdown menu.
+ *
+ * @param sideOffset - Spacing between trigger and menu (default: 4).
+ * @param className - Optional styling classes.
+ */
 const DropdownMenuContent = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content>
@@ -74,7 +96,12 @@ const DropdownMenuContent = React.forwardRef<
   </DropdownMenuPrimitive.Portal>
 ))
 DropdownMenuContent.displayName = DropdownMenuPrimitive.Content.displayName
-
+/**
+ * A single actionable dropdown item.
+ *
+ * @param inset - Adds padding to align with icons.
+ * @param className - Optional styling classes.
+ */
 const DropdownMenuItem = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Item> & {
@@ -92,7 +119,13 @@ const DropdownMenuItem = React.forwardRef<
   />
 ))
 DropdownMenuItem.displayName = DropdownMenuPrimitive.Item.displayName
-
+/**
+ * A dropdown item with a checkbox indicator.
+ *
+ * @param checked - Checkbox state.
+ * @param className - Styling classes.
+ * @param children - Label content.
+ */
 const DropdownMenuCheckboxItem = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.CheckboxItem>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.CheckboxItem>
@@ -116,7 +149,12 @@ const DropdownMenuCheckboxItem = React.forwardRef<
 ))
 DropdownMenuCheckboxItem.displayName =
   DropdownMenuPrimitive.CheckboxItem.displayName
-
+/**
+ * A dropdown item used in radio groups.
+ *
+ * @param className - Styling classes.
+ * @param children - Label content.
+ */
 const DropdownMenuRadioItem = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.RadioItem>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.RadioItem>
@@ -138,7 +176,12 @@ const DropdownMenuRadioItem = React.forwardRef<
   </DropdownMenuPrimitive.RadioItem>
 ))
 DropdownMenuRadioItem.displayName = DropdownMenuPrimitive.RadioItem.displayName
-
+/**
+ * Label used to describe a group of dropdown items.
+ *
+ * @param inset - Adds left padding.
+ * @param className - Optional styling.
+ */
 const DropdownMenuLabel = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Label>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Label> & {
@@ -156,7 +199,11 @@ const DropdownMenuLabel = React.forwardRef<
   />
 ))
 DropdownMenuLabel.displayName = DropdownMenuPrimitive.Label.displayName
-
+/**
+ * A horizontal separator used between dropdown items.
+ *
+ * @param className - Optional styling.
+ */
 const DropdownMenuSeparator = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Separator>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Separator>
@@ -168,7 +215,11 @@ const DropdownMenuSeparator = React.forwardRef<
   />
 ))
 DropdownMenuSeparator.displayName = DropdownMenuPrimitive.Separator.displayName
-
+/**
+ * A shortcut hint aligned to the right of a menu item.
+ *
+ * @param className - Optional styling.
+ */
 const DropdownMenuShortcut = ({
   className,
   ...props

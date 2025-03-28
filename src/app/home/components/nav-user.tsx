@@ -29,6 +29,16 @@ import {
 import Link from "next/link"
 import { Tables } from "@/types/database.types"
 
+/**
+ * Renders the user avatar and dropdown menu inside the sidebar.
+ *
+ * Displays the user's avatar, name, and email. Clicking the avatar
+ * reveals a dropdown with profile, settings, and logout options.
+ *
+ * @param profile - The current user's profile information.
+ * @returns The sidebar user menu component.
+ */
+
 // TODO: Fix typing
 // See todo in auth-actions.ts
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

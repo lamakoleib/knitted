@@ -1,6 +1,13 @@
 import { getPostDataByID } from "@/lib/db-actions";
 import EditForm from "./EditForm";
-
+/**
+ * Page component for editing an existing project.
+ *
+ * Fetches project data by ID and renders the `EditForm` with pre-filled values.
+ *
+ * @param params - URL params containing the `projectId`.
+ * @returns The edit project page.
+ */
 export default async function EditProjectPage({ params }: { params: { projectId: string } }) {
   const project = await getPostDataByID(params.projectId);
   return (

@@ -29,6 +29,16 @@ import {
 
 import { getCurrentUser } from "@/lib/auth-actions"
 import { getCurrentUserProfile } from "@/lib/db-actions"
+/**
+ * Sidebar navigation component for the Knitted app.
+ *
+ * Displays the app logo, navigation links, and user profile.
+ * Menu options include sections like Feed, Search, Patterns, etc.
+ * The sidebar is collapsible and adapts to icon-only mode.
+ *
+ * @param props - Props passed to the Sidebar component.
+ * @returns The application sidebar layout.
+ */
 
 //Mock data for user profile and sidebar menu options
 const data = {

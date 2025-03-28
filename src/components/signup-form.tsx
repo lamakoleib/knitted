@@ -6,6 +6,12 @@ import Link from "next/link"
 import { signup } from "@/lib/auth-actions"
 import Form from "next/form"
 
+/**
+ * Renders a signup form with first name, last name, email, and password inputs.
+ *
+ * Includes native form submission to `signup` server action and a fallback
+ * button for Google sign-in.
+ */
 export default function SignupForm({
 	className,
 	...props

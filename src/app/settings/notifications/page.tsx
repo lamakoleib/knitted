@@ -1,6 +1,14 @@
 import { Separator } from "@/components/ui/separator"
 import { NotificationsForm } from "./notifications-form"
-
+/**
+ * Renders the Notifications Settings Page.
+ *
+ * Includes:
+ * - Page heading and description
+ * - NotificationsForm to configure notification preferences
+ *
+ * @returns The settings section for managing notifications
+ */
 export default function SettingsNotificationsPage() {
 	return (
 		<div className="space-y-6">

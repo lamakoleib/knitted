@@ -36,6 +36,18 @@ const defaultValues: Partial<AppearanceFormValues> = {
 	theme: "light",
 };
 
+/**
+ * Renders a form for updating appearance preferences.
+ *
+ * Includes:
+ * - Font selection dropdown (`inter`, `manrope`, `system`)
+ * - Theme selector with light and dark preview tiles
+ * - Form validation using Zod and react-hook-form
+ * - Displays submitted data in a toast (mock behavior)
+ *
+ * @returns The appearance settings form component.
+ */
+
 export function AppearanceForm() {
 	const form = useForm<AppearanceFormValues>({
 		resolver: zodResolver(appearanceFormSchema),

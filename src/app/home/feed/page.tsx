@@ -1,5 +1,13 @@
 import { getCurrentUserProfile, getFeedPosts } from "@/lib/db-actions"
 import { PostCard } from "@/app/home/feed/components/post-card"
+/**
+ * Renders the main feed page with a list of posts.
+ *
+ * Fetches the user's profile and the feed posts from the database,
+ * and displays each post using the `PostCard` component.
+ *
+ * @returns The feed page with post cards.
+ */
 
 export default async function Feed() {
   const feedPosts = await getFeedPosts()

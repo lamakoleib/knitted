@@ -10,6 +10,14 @@ import {
   differenceInMonths,
   differenceInYears,
 } from "date-fns"
+
+/**
+ * Returns a concise, human-readable relative time string (e.g. "5m", "3h", "2d") 
+ * for how long ago the given timestamp occurred.
+ *
+ * @param timestamp - An ISO date string to format.
+ * @returns A string representing the time difference from now in a short format.
+ */
 export function formatTimeAgo(timestamp: string): string {
   const date = new Date(timestamp)
 
@@ -49,8 +57,14 @@ export function formatTimeAgo(timestamp: string): string {
 }
 
 /**
- * Formats a timestamp for display in a post or comment
- * Provides both relative time and exact time on hover
+ * Formats a timestamp for UI display in posts or comments.
+ *
+ * Returns both:
+ * - a compact relative time (e.g. "2h" or "Mar 12, 2025"), used for display
+ * - a full formatted date string (e.g. "Mar 12, 2025, 5:45 PM"), used for tooltips or `title` attributes
+ *
+ * @param timestamp - An ISO date string to format.
+ * @returns An object with `display` (compact string) and `title` (full string) values.
  */
 export function formatPostTime(timestamp: string): {
   display: string

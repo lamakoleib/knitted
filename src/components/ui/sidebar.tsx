@@ -46,7 +46,9 @@ function useSidebar() {
 
 	return context;
 }
-
+/**
+ * Provides sidebar context for managing state, layout, and responsiveness.
+ */
 const SidebarProvider = React.forwardRef<
 	HTMLDivElement,
 	React.ComponentProps<"div"> & {
@@ -156,6 +158,13 @@ const SidebarProvider = React.forwardRef<
 );
 SidebarProvider.displayName = "SidebarProvider";
 
+/**
+ * Main Sidebar component that adapts layout for desktop.
+ *
+ * @param side - Sidebar position ("left" | "right")
+ * @param variant - Layout style ("sidebar" | "floating" | "inset")
+ * @param collapsible - Collapse behavior ("offcanvas" | "icon" | "none")
+ */
 const Sidebar = React.forwardRef<
 	HTMLDivElement,
 	React.ComponentProps<"div"> & {
@@ -259,6 +268,9 @@ const Sidebar = React.forwardRef<
 );
 Sidebar.displayName = "Sidebar";
 
+/**
+ * Button to toggle sidebar open/collapsed state.
+ */
 const SidebarTrigger = React.forwardRef<
 	React.ElementRef<typeof Button>,
 	React.ComponentProps<typeof Button>
@@ -533,6 +545,12 @@ const sidebarMenuButtonVariants = cva(
 	}
 );
 
+/**
+ * Button inside the sidebar menu.
+ *
+ * @param isActive - Whether the menu item is selected
+ * @param tooltip - Optional tooltip shown when sidebar is collapsed
+ */
 const SidebarMenuButton = React.forwardRef<
 	HTMLButtonElement,
 	React.ComponentProps<"button"> & {
@@ -644,6 +662,10 @@ const SidebarMenuBadge = React.forwardRef<
 ));
 SidebarMenuBadge.displayName = "SidebarMenuBadge";
 
+/**
+ * Skeleton loader for sidebar menu items.
+ * Used while loading sidebar content.
+ */
 const SidebarMenuSkeleton = React.forwardRef<
 	HTMLDivElement,
 	React.ComponentProps<"div"> & {
@@ -705,6 +727,12 @@ const SidebarMenuSubItem = React.forwardRef<
 >(({ ...props }, ref) => <li ref={ref} {...props} />);
 SidebarMenuSubItem.displayName = "SidebarMenuSubItem";
 
+/**
+ * Sub-item button inside a sidebar group.
+ *
+ * @param isActive - Highlights the button when active
+ * @param size - Optional size variant ("sm" | "md")
+ */
 const SidebarMenuSubButton = React.forwardRef<
 	HTMLAnchorElement,
 	React.ComponentProps<"a"> & {

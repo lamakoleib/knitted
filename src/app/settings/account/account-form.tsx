@@ -51,6 +51,20 @@ const defaultValues: Partial<AccountFormValues> = {
 	// dob: new Date("2023-01-23"),
 };
 
+/**
+ * Renders a user account form with validation.
+ *
+ * Includes:
+ * - Name input with min/max length validation
+ * - Date of birth picker with disabled past/future limits
+ * - Language select (defined in schema but not yet rendered)
+ * - Submit handler displays data in a toast (mock behavior)
+ *
+ * Uses Zod for schema validation and React Hook Form for form state.
+ *
+ * @returns The account form UI component.
+ */
+
 export function AccountForm() {
 	const form = useForm<AccountFormValues>({
 		resolver: zodResolver(accountFormSchema),

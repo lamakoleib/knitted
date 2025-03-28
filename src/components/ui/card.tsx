@@ -2,6 +2,13 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Root card container component.
+ *
+ * Provides base layout, background, border, and shadow for a card.
+ *
+ * @param props - HTML div attributes and optional custom className.
+ */
 const Card = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -17,6 +24,13 @@ const Card = React.forwardRef<
 ))
 Card.displayName = "Card"
 
+/**
+ * Card header container.
+ *
+ * Typically includes the title and description.
+ *
+ * @param props - HTML div attributes and optional custom className.
+ */
 const CardHeader = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -28,7 +42,13 @@ const CardHeader = React.forwardRef<
   />
 ))
 CardHeader.displayName = "CardHeader"
-
+/**
+ * Card title text.
+ *
+ * Styled as a bold, high-emphasis heading.
+ *
+ * @param props - HTML div attributes and optional custom className.
+ */
 const CardTitle = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -40,7 +60,13 @@ const CardTitle = React.forwardRef<
   />
 ))
 CardTitle.displayName = "CardTitle"
-
+/**
+ * Card description text.
+ *
+ * Used for secondary or supporting information.
+ *
+ * @param props - HTML div attributes and optional custom className.
+ */
 const CardDescription = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -52,7 +78,13 @@ const CardDescription = React.forwardRef<
   />
 ))
 CardDescription.displayName = "CardDescription"
-
+/**
+ * Card content body.
+ *
+ * Main content area of the card.
+ *
+ * @param props - HTML div attributes and optional custom className.
+ */
 const CardContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -61,6 +93,13 @@ const CardContent = React.forwardRef<
 ))
 CardContent.displayName = "CardContent"
 
+/**
+ * Card footer container.
+ *
+ * Typically contains actions or summary content.
+ *
+ * @param props - HTML div attributes and optional custom className.
+ */
 const CardFooter = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>

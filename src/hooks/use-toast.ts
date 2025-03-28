@@ -8,9 +8,21 @@ import type {
   ToastProps,
 } from "@/components/ui/toast"
 
+/**
+ * A simple toast notification system inspired by `react-hot-toast`,
+ * using a custom reducer and global state management.
+ *
+ * @module use-toast
+ */
+
+/** Maximum number of concurrent toasts shown at once. */
 const TOAST_LIMIT = 1
+/** Delay before a toast is fully removed after dismissal (in ms). */
 const TOAST_REMOVE_DELAY = 1000000
 
+/**
+ * Extended toast object used internally with ID and optional action.
+ */
 type ToasterToast = ToastProps & {
   id: string
   title?: React.ReactNode
@@ -18,6 +30,9 @@ type ToasterToast = ToastProps & {
   action?: ToastActionElement
 }
 
+/**
+ * Action types for toast reducer.
+ */
 const actionTypes = {
   ADD_TOAST: "ADD_TOAST",
   UPDATE_TOAST: "UPDATE_TOAST",
@@ -27,6 +42,9 @@ const actionTypes = {
 
 let count = 0
 
+/**
+ * Generates a unique ID for a toast.
+ */
 function genId() {
   count = (count + 1) % Number.MAX_SAFE_INTEGER
   return count.toString()
@@ -58,6 +76,10 @@ interface State {
 
 const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
 
+/**
+ * Adds a toast to the removal queue with a delay.
+ * Prevents multiple timers for the same toast.
+ */
 const addToRemoveQueue = (toastId: string) => {
   if (toastTimeouts.has(toastId)) {
     return
@@ -74,6 +96,9 @@ const addToRemoveQueue = (toastId: string) => {
   toastTimeouts.set(toastId, timeout)
 }
 
+/**
+ * Reducer to manage toast state transitions.
+ */
 export const reducer = (state: State, action: Action): State => {
   switch (action.type) {
     case "ADD_TOAST":
@@ -133,6 +158,9 @@ const listeners: Array<(state: State) => void> = []
 
 let memoryState: State = { toasts: [] }
 
+/**
+ * Dispatches an action to the toast reducer and notifies listeners.
+ */
 function dispatch(action: Action) {
   memoryState = reducer(memoryState, action)
   listeners.forEach((listener) => {
@@ -142,6 +170,12 @@ function dispatch(action: Action) {
 
 type Toast = Omit<ToasterToast, "id">
 
+/**
+ * Creates and displays a new toast.
+ *
+ * @param props - Toast configuration (title, description, etc.)
+ * @returns An object with the toast ID and control methods (dismiss, update).
+ */
 function toast({ ...props }: Toast) {
   const id = genId()
 
@@ -170,7 +204,11 @@ function toast({ ...props }: Toast) {
     update,
   }
 }
-
+/**
+ * Custom hook to access toast state and helper functions.
+ *
+ * @returns Toast state and helpers: `toast`, `dismiss`.
+ */
 function useToast() {
   const [state, setState] = React.useState<State>(memoryState)
 

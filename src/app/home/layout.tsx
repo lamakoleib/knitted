@@ -14,6 +14,20 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Separator } from "@/components/ui/separator"
 import { Dock } from "./components/dock"
+
+/**
+ * Main layout wrapper for the authenticated app pages.
+ *
+ * Includes:
+ * - A sidebar (`AppSidebar`) managed by `SidebarProvider`
+ * - A header with breadcrumb navigation
+ * - An inset section that renders the main `children` content
+ * - Optional `Dock` (currently commented out) for mobile/floating nav
+ *
+ * @param children - The page content to render inside the layout
+ * @returns The complete app layout with sidebar and header
+ */
+
 export default async function Layout({
   children,
 }: {

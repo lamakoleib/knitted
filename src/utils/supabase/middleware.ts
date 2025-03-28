@@ -2,6 +2,18 @@ import { getCurrentUserProfile } from "@/lib/db-actions"
 import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
 
+/**
+ * Middleware-like function to update the user's Supabase session and handle route access.
+ *
+ * - Attaches Supabase auth session based on cookies from the request.
+ * - Redirects unauthenticated users to `/login` unless visiting login/signup.
+ * - Redirects authenticated users:
+ *   - To `/settings` if their profile isn't initialized.
+ *   - To `/home` if they're visiting `/login`, `/signup`, or `/`.
+ *
+ * @param request - The incoming Next.js request object.
+ * @returns A `NextResponse` object which may include redirection.
+ */
 export async function updateSession(request: NextRequest) {
 	let supabaseResponse = NextResponse.next({
 		request,

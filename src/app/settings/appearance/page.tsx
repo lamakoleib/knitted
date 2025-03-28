@@ -1,6 +1,16 @@
 import { Separator } from "@/components/ui/separator";
 import { AppearanceForm } from "./appearance-form";
 
+/**
+ * Settings page for customizing the application's appearance.
+ *
+ * Renders:
+ * - A heading and description about appearance preferences
+ * - A separator line
+ * - The `AppearanceForm` component for selecting font and theme
+ *
+ * @returns The appearance settings page layout.
+ */
 export default function SettingsAppearancePage() {
 	return (
 		<div className="space-y-6">

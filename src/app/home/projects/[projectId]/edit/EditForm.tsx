@@ -62,7 +62,17 @@ const editSchema = z.object({
   timeSpent: z.number().min(0).optional(),
   tags: z.string().optional(),
 });
-
+/**
+ * Renders an edit form for updating an existing knitting project.
+ *
+ * Allows users to:
+ * - Upload and preview project images (up to 5)
+ * - Update title, description, yarn types, pattern, difficulty, status, etc.
+ * - Submit updated data to the database via `updateProjectByID`
+ *
+ * @param project - The existing project data to prefill the form with
+ * @returns A fully featured form UI for editing a project
+ */
 export default function EditForm({ project }: { project: any }) {
     const router = useRouter();
     const [images, setImages] = useState<File[]>([]);

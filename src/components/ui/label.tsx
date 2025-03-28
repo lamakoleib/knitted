@@ -10,6 +10,14 @@ const labelVariants = cva(
   "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 )
 
+/**
+ * A styled label component based on Radix UI's LabelPrimitive.
+ * 
+ * Inherits accessibility behavior and supports variant-based styling.
+ *
+ * @param className - Optional additional styling classes.
+ * @param props - Standard label props from Radix.
+ */
 const Label = React.forwardRef<
   React.ElementRef<typeof LabelPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root> &

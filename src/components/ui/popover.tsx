@@ -5,12 +5,23 @@ import * as PopoverPrimitive from "@radix-ui/react-popover"
 
 import { cn } from "@/lib/utils"
 
+/** Root component that manages the popover's open/close state. */
 const Popover = PopoverPrimitive.Root
 
+/** Element that triggers the popover when clicked or focused. */
 const PopoverTrigger = PopoverPrimitive.Trigger
 
+/** Anchor element to position the popover relative to. */
 const PopoverAnchor = PopoverPrimitive.Anchor
 
+/**
+ * Popover content panel with styling and animation.
+ *
+ * @param className - Optional additional styling.
+ * @param align - Alignment relative to the trigger (default: "center").
+ * @param sideOffset - Distance in pixels from the trigger (default: 4).
+ * @param props - All other content props from Radix.
+ */
 const PopoverContent = React.forwardRef<
   React.ElementRef<typeof PopoverPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content>

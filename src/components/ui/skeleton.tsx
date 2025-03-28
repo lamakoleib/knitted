@@ -1,5 +1,11 @@
 import { cn } from "@/lib/utils"
 
+/**
+ * A placeholder loading component with pulsing animation.
+ * Used to indicate content is loading.
+ *
+ * @param className - Optional Tailwind classes for styling
+ */
 function Skeleton({
   className,
   ...props

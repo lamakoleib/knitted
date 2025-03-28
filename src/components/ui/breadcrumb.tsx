@@ -4,6 +4,12 @@ import { ChevronRight, MoreHorizontal } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+
+/**
+ * Root component for breadcrumb navigation.
+ *
+ * @param props - Standard `<nav>` props with an optional `separator`.
+ */
 const Breadcrumb = React.forwardRef<
   HTMLElement,
   React.ComponentPropsWithoutRef<"nav"> & {
@@ -11,7 +17,11 @@ const Breadcrumb = React.forwardRef<
   }
 >(({ ...props }, ref) => <nav ref={ref} aria-label="breadcrumb" {...props} />)
 Breadcrumb.displayName = "Breadcrumb"
-
+/**
+ * List container for breadcrumb items.
+ *
+ * @param props - Standard `<ol>` props.
+ */
 const BreadcrumbList = React.forwardRef<
   HTMLOListElement,
   React.ComponentPropsWithoutRef<"ol">
@@ -26,7 +36,11 @@ const BreadcrumbList = React.forwardRef<
   />
 ))
 BreadcrumbList.displayName = "BreadcrumbList"
-
+/**
+ * A single breadcrumb item wrapper.
+ *
+ * @param props - Standard `<li>` props.
+ */
 const BreadcrumbItem = React.forwardRef<
   HTMLLIElement,
   React.ComponentPropsWithoutRef<"li">
@@ -38,7 +52,11 @@ const BreadcrumbItem = React.forwardRef<
   />
 ))
 BreadcrumbItem.displayName = "BreadcrumbItem"
-
+/**
+ * A link inside a breadcrumb item. Can render as a child component.
+ *
+ * @param props - Standard `<a>` props with optional `asChild` to use another component.
+ */
 const BreadcrumbLink = React.forwardRef<
   HTMLAnchorElement,
   React.ComponentPropsWithoutRef<"a"> & {
@@ -56,7 +74,11 @@ const BreadcrumbLink = React.forwardRef<
   )
 })
 BreadcrumbLink.displayName = "BreadcrumbLink"
-
+/**
+ * A span indicating the current breadcrumb page.
+ *
+ * @param props - Standard `<span>` props.
+ */
 const BreadcrumbPage = React.forwardRef<
   HTMLSpanElement,
   React.ComponentPropsWithoutRef<"span">
@@ -71,7 +93,11 @@ const BreadcrumbPage = React.forwardRef<
   />
 ))
 BreadcrumbPage.displayName = "BreadcrumbPage"
-
+/**
+ * Separator displayed between breadcrumb items.
+ *
+ * @param props - Standard `<li>` props. Defaults to a `ChevronRight` icon.
+ */
 const BreadcrumbSeparator = ({
   children,
   className,
@@ -87,7 +113,11 @@ const BreadcrumbSeparator = ({
   </li>
 )
 BreadcrumbSeparator.displayName = "BreadcrumbSeparator"
-
+/**
+ * An ellipsis icon for truncated breadcrumb paths.
+ *
+ * @param props - Standard `<span>` props.
+ */
 const BreadcrumbEllipsis = ({
   className,
   ...props

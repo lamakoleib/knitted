@@ -8,6 +8,19 @@ import { z } from "zod"
 import { projectSchema } from "@/types/schemas"
 import { FeedPost } from "@/types/feed"
 
+/**
+ * Server-side actions for interacting with Supabase.
+ *
+ * This module contains all logic related to:
+ * - User profile and project CRUD operations
+ * - Search and filtering
+ * - Followers/following system
+ * - Project feed, likes, saves, and comments
+ * - Form submissions and validation
+ *
+ * These actions are used throughout the app to interact with Supabase tables such as
+ * `Profiles`, `Project`, `Comments`, `Followers`, `Likes`, and `Patterns`.
+ */
 type ActionResponse = {
   success: boolean
   message?: string

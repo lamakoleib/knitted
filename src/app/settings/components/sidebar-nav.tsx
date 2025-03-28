@@ -12,7 +12,15 @@ interface SidebarNavProps extends React.HTMLAttributes<HTMLElement> {
 		title: string;
 	}[];
 }
-
+/**
+ * Renders a vertical sidebar navigation menu for the settings pages.
+ *
+ * Highlights the active link based on the current pathname.
+ * Uses `buttonVariants` for consistent styling.
+ *
+ * @param items - An array of navigation items with `href` and `title`
+ * @returns A styled `<nav>` element with navigation links.
+ */
 export function SidebarNav({ className, items, ...props }: SidebarNavProps) {
 	const pathname = usePathname();
 

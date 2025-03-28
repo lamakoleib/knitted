@@ -28,6 +28,11 @@ const FormFieldContext = React.createContext<FormFieldContextValue>(
   {} as FormFieldContextValue
 )
 
+/**
+ * Wraps `Controller` from react-hook-form and injects field name into context.
+ *
+ * @param props - Standard ControllerProps from react-hook-form.
+ */
 const FormField = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
@@ -41,6 +46,11 @@ const FormField = <
   )
 }
 
+/**
+ * Hook to access the current form field's metadata and validation state.
+ *
+ * Throws if used outside of a <FormField> context.
+ */
 const useFormField = () => {
   const fieldContext = React.useContext(FormFieldContext)
   const itemContext = React.useContext(FormItemContext)
@@ -68,10 +78,18 @@ type FormItemContextValue = {
   id: string
 }
 
+/**
+ * Context for storing a unique ID per form item.
+ */
 const FormItemContext = React.createContext<FormItemContextValue>(
   {} as FormItemContextValue
 )
 
+/**
+ * Container component that provides layout and a unique ID to its field.
+ *
+ * @param className - Optional additional styling classes.
+ */
 const FormItem = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -86,6 +104,11 @@ const FormItem = React.forwardRef<
 })
 FormItem.displayName = "FormItem"
 
+/**
+ * Label for a form field. Automatically links to its control and updates based on error state.
+ *
+ * @param className - Optional styling classes.
+ */
 const FormLabel = React.forwardRef<
   React.ElementRef<typeof LabelPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root>
@@ -103,6 +126,9 @@ const FormLabel = React.forwardRef<
 })
 FormLabel.displayName = "FormLabel"
 
+/**
+ * Wrapper for form controls. Handles accessibility attributes and links with labels, messages, and descriptions.
+ */
 const FormControl = React.forwardRef<
   React.ElementRef<typeof Slot>,
   React.ComponentPropsWithoutRef<typeof Slot>
@@ -125,6 +151,11 @@ const FormControl = React.forwardRef<
 })
 FormControl.displayName = "FormControl"
 
+/**
+ * Optional description text for a form field.
+ *
+ * @param className - Optional styling classes.
+ */
 const FormDescription = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
@@ -142,6 +173,12 @@ const FormDescription = React.forwardRef<
 })
 FormDescription.displayName = "FormDescription"
 
+/**
+ * Validation message shown for a form field if there's an error.
+ *
+ * @param className - Optional styling classes.
+ * @param children - Fallback content if error message is not present.
+ */
 const FormMessage = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>

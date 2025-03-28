@@ -3,6 +3,14 @@ import React from "react"
 import { FloatingDock } from "@/components/ui/floating-dock"
 import { Home, Plus, Cog, User, Bell } from "lucide-react"
 
+/**
+ * Renders a floating dock with navigation icons.
+ *
+ * Displays navigation options such as Home, Profile, Post, Notifications, and Settings.
+ * The dock is fixed at the bottom center of the screen and uses the `FloatingDock` component.
+ *
+ * @returns The floating dock component.
+ */
 export function Dock() {
   const links = [
     {

@@ -10,6 +10,11 @@ import {
   ToastViewport,
 } from "@/components/ui/toast"
 
+/**
+ * Renders and manages a list of toast notifications using ToastProvider.
+ *
+ * Automatically maps over toast data from `useToast()` and renders UI components accordingly.
+ */
 export function Toaster() {
   const { toasts } = useToast()
 

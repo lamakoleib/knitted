@@ -5,12 +5,26 @@ import * as TooltipPrimitive from "@radix-ui/react-tooltip"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Wraps your app or component tree to enable tooltip functionality.
+ */
 const TooltipProvider = TooltipPrimitive.Provider
 
+/**
+ * Root element that manages tooltip trigger and content pairing.
+ */
 const Tooltip = TooltipPrimitive.Root
 
+/**
+ * Element that triggers the tooltip on hover or focus.
+ */
 const TooltipTrigger = TooltipPrimitive.Trigger
 
+/**
+ * Tooltip content that appears near the trigger element.
+ *
+ * @param sideOffset - Distance from the trigger (default: 4px)
+ */
 const TooltipContent = React.forwardRef<
   React.ElementRef<typeof TooltipPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content>

@@ -1,6 +1,17 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr"
 import { cookies, type UnsafeUnwrappedCookies } from "next/headers"
 
+/**
+ * Creates a Supabase server client instance for use in Server Components or server actions.
+ *
+ * This function adapts Supabase's cookie-based session handling to Next.js's
+ * `next/headers` API and supports session persistence using cookies.
+ *
+ * It provides `get`, `set`, and `remove` cookie operations, with graceful error handling
+ * when invoked from Server Components.
+ *
+ * @returns A configured Supabase client for server-side operations.
+ */
 export async function createClient() {
   const cookieStore = (await cookies()) as unknown as UnsafeUnwrappedCookies
 
