@@ -25,10 +25,12 @@ import {
   SidebarMenuItem,
   SidebarGroup,
   SidebarGroupLabel,
+  SidebarMenuBadge,
 } from "@/components/ui/sidebar"
 
 import { getCurrentUser } from "@/lib/auth-actions"
-import { getCurrentUserProfile } from "@/lib/db-actions"
+import { getCurrentUserProfile, unreadNotificationsCount } from "@/lib/db-actions"
+
 /**
  * Sidebar navigation component for the Knitted app.
  *
@@ -48,9 +50,9 @@ const data = {
     avatar: "https://github.com/shadcn.png",
   },
   options: [
-    {
-      name: "Feed",
-      url: "/home/feed",
+    { 
+      name: "Feed", 
+      url: "/home/feed", 
       icon: Rss,
     },
     /*{
@@ -77,26 +79,26 @@ const data = {
       name: "Messages",
       url: "#",
       icon: MessageCircle,
-    },
-    {
-      name: "Notifications",
-      url: "#",
+    },    
+    { 
+      name: "Notifications", 
+      url: "/home/notifications", 
       icon: Bell,
     },
-    {
-      name: "Create Project",
-      url: "/home/upload",
-      icon: PlusCircle,
+    { 
+      name: "Create Project", 
+      url: "/home/upload", 
+      icon: PlusCircle, 
     },
   ],
 }
-
 //Sidebar component for the application
 export async function AppSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
   const user = await getCurrentUser()
   const profile = await getCurrentUserProfile()
+  const unreadCount = await unreadNotificationsCount().catch(() => 0)
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -117,31 +119,39 @@ export async function AppSidebar({
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      
+
       {/* Sidebar content */}
       <SidebarContent>
         <SidebarGroup className="group-data-[collapsible=icon]:hidden">
           <SidebarGroupLabel>Application</SidebarGroupLabel>
           <SidebarMenu>
-            {data.options.map((item) => (
-              <SidebarMenuItem key={item.name}>
-                <SidebarMenuButton size="lg" asChild>
-                  <a href={item.url}>
-                    <item.icon />
-                    <span>{item.name}</span>
-                  </a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
+            {data.options.map((item) => {
+              const isNotifications = item.name === "Notifications"
+              return (
+                <SidebarMenuItem key={item.name}>
+                  <SidebarMenuButton size="lg" asChild>
+                    <a href={item.url}>
+                      <item.icon />
+                      <span>{item.name}</span>
+                      {isNotifications && unreadCount > 0 && (
+                        <SidebarMenuBadge className="bg-red-300 text-black">
+                          {unreadCount}
+                        </SidebarMenuBadge>
+                      )}
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )
+            })}
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
-      
+
       {/* Sidebar footer */}
       <SidebarFooter>
         <NavUser profile={profile} />
       </SidebarFooter>
-      
+
       <SidebarRail />
     </Sidebar>
   )

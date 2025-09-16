@@ -740,3 +740,85 @@ export async function getComments(projectId: number) {
     avatar_url: comment.Profiles?.avatar_url,
   }))
 }
+
+export type NotificationType = "like" | "comment" | "follow"
+
+export type NotificationRow = 
+{
+  notification_id: number
+  user_id: string
+  actor_id: string
+  project_id: number | null
+  type: NotificationType
+  is_read: boolean | null
+  created_at: string
+}
+
+export type NotificationWithActor = NotificationRow & 
+{
+  actor_profile: {
+    id: string
+    username: string | null
+    avatar_url: string | null
+    full_name: string | null
+  } | null
+}
+
+export async function unreadNotificationsCount(): Promise<number> 
+{
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return 0
+
+  const { count, error } = await supabase
+    .from("notifications")
+    .select("notification_id", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .or("is_read.is.false,is_read.is.null")
+
+  if (error) return 0
+  return count ?? 0
+}
+
+export async function markAllNotificationsRead(): Promise<void> 
+{
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+
+  await supabase
+    .from("notifications")
+    .update({ is_read: true })
+    .eq("user_id", user.id)
+    .or("is_read.is.false,is_read.is.null")
+}
+
+export async function fetchNotifications(limit = 50): Promise<NotificationWithActor[]> 
+{
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
+
+  const { data: notifs } = await supabase
+    .from("notifications")
+    .select("notification_id, user_id, actor_id, project_id, type, is_read, created_at")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(limit)
+
+  const notifications = notifs ?? []
+  const actorIds = Array.from(new Set(notifications.map(n => n.actor_id).filter(Boolean)))
+
+  let profilesById: Record<string, { id: string; username: string | null; avatar_url: string | null; full_name: string | null }> = {}
+  if (actorIds.length) {
+    const { data: profiles } = await supabase
+      .from("Profiles")
+      .select("id, username, avatar_url, full_name")
+      .in("id", actorIds)
+    profilesById = Object.fromEntries((profiles ?? []).map(p => [p.id, p]))
+  }
+  return notifications.map(n => ({
+    ...n,
+    actor_profile: profilesById[n.actor_id] ?? null,
+  }))
+}
