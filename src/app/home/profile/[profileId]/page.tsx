@@ -106,10 +106,12 @@ export default async function Profile({
                     <Ban className="mr-2 h-4 w-4" />
                     <span>Blocked</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                  <Link href={`/home/profile/${profileId}/saved`}>
                     <Bookmark className="mr-2 h-4 w-4" />
                     <span>Saved</span>
-                  </DropdownMenuItem>
+                  </Link>
+                </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
