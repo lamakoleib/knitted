@@ -740,3 +740,92 @@ export async function getComments(projectId: number) {
     avatar_url: comment.Profiles?.avatar_url,
   }))
 }
+function toUuidArray(raw: unknown): string[] {
+  const arr = Array.isArray(raw) ? raw : [];
+  const uuidRE =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  return arr
+    .map((x) => (typeof x === "string" ? x : String(x)))
+    .filter((s) => uuidRE.test(s));
+}
+
+/** Is the project's creator saved by the current user? */
+export async function isProjectSavedByCreator(creatorUserId: string): Promise<boolean> {
+  const supabase = await createClient();
+  const { user } = await getCurrentUser();
+  const uid = user?.id;
+  if (!uid || !creatorUserId) return false;
+
+  const { data, error } = await supabase
+    .from("Profiles")
+    .select("saved_projects")
+    .eq("id", uid)
+    .single();
+
+  if (error) {
+    console.error("isProjectSavedByCreator error:", error);
+    return false;
+  }
+
+  const saved = toUuidArray(data?.saved_projects);
+  return saved.includes(creatorUserId);
+}
+
+/** Toggle saving the *creator UUID* in Profiles.saved_projects (uuid[]) */
+export async function toggleSaveByCreator(
+  creatorUserId: string,
+  currentlySaved: boolean
+) {
+  const supabase = await createClient();
+  const { user } = await getCurrentUser();
+  const uid = user?.id;
+  if (!uid) throw new Error("Not signed in");
+  if (!creatorUserId) throw new Error("Missing creatorUserId");
+
+  const { data, error } = await supabase
+    .from("Profiles")
+    .select("saved_projects")
+    .eq("id", uid)
+    .single();
+  if (error) throw error;
+
+  const prev = toUuidArray(data?.saved_projects);
+  const next = currentlySaved
+    ? prev.filter((id) => id !== creatorUserId)
+    : prev.includes(creatorUserId)
+    ? prev
+    : [...prev, creatorUserId];
+
+  const { error: upErr } = await supabase
+    .from("Profiles")
+    .update({ saved_projects: next })
+    .eq("id", uid);
+  if (upErr) throw upErr;
+}
+
+/** Saved page: show projects by saved *creators* */
+export async function getMySavedProjects() {
+  const supabase = await createClient();
+  const { user } = await getCurrentUser();
+  const uid = user?.id;
+  if (!uid) return [];
+
+  const { data: prof, error } = await supabase
+    .from("Profiles")
+    .select("saved_projects")
+    .eq("id", uid)
+    .single();
+  if (error) throw error;
+
+  const creatorIds = toUuidArray(prof?.saved_projects);
+  if (creatorIds.length === 0) return [];
+
+  const { data: projects, error: e2 } = await supabase
+    .from("Project")
+    .select("*")
+    .in("user_id", creatorIds) // filter by CREATOR uuid
+    .order("created_at", { ascending: false });
+  if (e2) throw e2;
+
+  return projects ?? [];
+}
