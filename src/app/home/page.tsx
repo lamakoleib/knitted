@@ -1,8 +1,8 @@
 import Link from "next/link"
 import { getCurrentUser } from "@/lib/auth-actions"
 import { getCurrentUserProfile, unreadNotificationsCount } from "@/lib/db-actions"
-
-import{
+import
+{
   Card,
   CardHeader,
   CardTitle,
@@ -10,11 +10,11 @@ import{
   CardContent,
 } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-
 import { Rss, Users, Bell, Plus, Search as SearchIcon } from "lucide-react"
 
 //helper for time to greet users
-function greet() {
+function greet() 
+{
   const h = new Date().getHours()
   if (h < 6) return "Good night"
   if (h < 12) return "Good morning"
@@ -60,8 +60,8 @@ function FeatureTile({
 }
 
 export const dynamic = "force-dynamic"
-
-export default async function HomePage() {
+export default async function HomePage() 
+{
   //Fetching signed-in user and profile
   const user = await getCurrentUser()
   const profile = await getCurrentUserProfile().catch(() => null)
@@ -89,7 +89,7 @@ export default async function HomePage() {
 
           {/* Description */}
           <CardDescription className="max-w-3xl">
-            Knitted is a cozy space to share your knitting & crochet projects,
+            Knitted is a space to share your knitting & crochet projects,
             track yarn and patterns, follow creators, and discover inspiration
             from the community.
           </CardDescription>
@@ -103,7 +103,7 @@ export default async function HomePage() {
           href="/home/feed"
           icon={Rss}
           title="Explore feed"
-          description="See the latest posts from people you follow and the wider community."
+          description="See the latest posts from people you follow."
         />
         <FeatureTile
           href="/home/search"
@@ -115,26 +115,25 @@ export default async function HomePage() {
           href="/home/upload"
           icon={Plus}
           title="Create a project"
+          description="Share your projects with photos, yarn details, and patterns used."
+        />
+        <FeatureTile
+          href=""
+          icon={Users}
+          title="Explore yarn"
+          description="Browse materials to plan your next project."
+        />
+		<FeatureTile
+          href=""
+          icon={Users}
+          title="Explore patterns"
+          description="Browse patterns to plan your next project."
+        />
+		<FeatureTile
+          href="/home/upload"
+          icon={Plus}
+          title="Create a project"
           description="Share your makes with photos, yarn details, and patterns used."
-        />
-        <FeatureTile
-          href="/home/notifications"
-          icon={Bell}
-          title="Notifications"
-          description="Likes, comments, and follows appear here."
-          badge={unread}
-        />
-        <FeatureTile
-          href="/home/search?tab=yarn"
-          icon={Users}
-          title="Yarn & patterns"
-          description="Browse materials and patterns to plan your next project."
-        />
-        <FeatureTile
-          href="/home/profile"
-          icon={Users}
-          title="Your profile"
-          description="Update your bio, avatar, and see your shared projects."
         />
       </div>
     </div>
