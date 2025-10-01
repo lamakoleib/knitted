@@ -67,7 +67,7 @@ const data = {
     },
     {
       name: "Yarn",
-      url: "#",
+      url: "/home/yarn",
       icon: AudioWaveform,
     },
     {
