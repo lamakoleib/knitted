@@ -11,7 +11,6 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { ScrollArea } from "@/components/ui/scroll-area"
 
 //yarn types
-
 type YarnWeight =
   | "Lace"
   | "Light Fingering"
