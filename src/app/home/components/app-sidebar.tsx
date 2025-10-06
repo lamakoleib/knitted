@@ -55,11 +55,6 @@ const data = {
       url: "/home/feed", 
       icon: Rss,
     },
-    /*{
-      name: "Explore",
-      url: "#",
-      icon: Map,
-    },*/
     {
       name: "Search",
       url: "/home/search",
@@ -72,7 +67,7 @@ const data = {
     },
     {
       name: "Patterns",
-      url: "#",
+      url: "/home/patterns",
       icon: Frame,
     },
     {

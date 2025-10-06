@@ -118,22 +118,22 @@ export default async function HomePage()
           description="Share your projects with photos, yarn details, and patterns used."
         />
         <FeatureTile
-          href=""
+          href="/home/yarn"
           icon={Users}
           title="Explore yarn"
           description="Browse materials to plan your next project."
         />
 		<FeatureTile
-          href=""
+          href="/home/patterns"
           icon={Users}
           title="Explore patterns"
           description="Browse patterns to plan your next project."
         />
 		<FeatureTile
-          href="/home/upload"
-          icon={Plus}
-          title="Create a project"
-          description="Share your makes with photos, yarn details, and patterns used."
+          href="/home/notifications"
+          icon={Bell}
+          title="Visit your notifications"
+          description="Look at your recent likes, comments, and followers."
         />
       </div>
     </div>
