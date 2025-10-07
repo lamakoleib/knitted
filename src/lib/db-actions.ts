@@ -576,42 +576,49 @@ export async function unlikePost(projectId: number) {
 }
 
 export async function savePost(projectId: number) {
-  const user = await getCurrentUser()
-  if (!user || !user.user?.id) return { error: "User not found" }
+  const user = await getCurrentUser();
+  if (!user?.user?.id) return { success: false, error: "User not found" };
 
-  const supabase = await createClient()
+  const supabase = await createClient();
+  const ids = await getMySavedIdsRaw(user.user.id);
+  if (!ids.includes(projectId)) ids.push(projectId);
 
   const { error } = await supabase
     .from("Profiles")
-    .update({
-      saved_projects: supabase.rpc("array_append", {
-        column: "saved_projects",
-        value: projectId,
-      }),
-    })
-    .eq("id", user.user.id)
+    .update({ saved_projects: ids })
+    .eq("id", user.user.id);
 
-  return { success: !error, error }
+  return { success: !error, error: error ?? null };
 }
+
 
 export async function unsavePost(projectId: number) {
-  const user = await getCurrentUser()
-  if (!user || !user.user?.id) return { error: "User not found" }
+  const user = await getCurrentUser();
+  if (!user?.user?.id) return { success: false, error: "User not found" };
 
-  const supabase = await createClient()
+  const supabase = await createClient();
+  const ids = await getMySavedIdsRaw(user.user.id);
+  const next = ids.filter((id) => id !== projectId);
 
   const { error } = await supabase
     .from("Profiles")
-    .update({
-      saved_projects: supabase.rpc("array_remove", {
-        column: "saved_projects",
-        value: projectId,
-      }),
-    })
-    .eq("id", user.user.id)
+    .update({ saved_projects: next })
+    .eq("id", user.user.id);
 
-  return { success: !error, error }
+  return { success: !error, error: error ?? null };
 }
+export async function toggleSavePost(projectId: number) {
+  const saved = await isSaved(projectId);
+  if (saved) {
+    await unsavePost(projectId);
+    return { saved: false };
+  } else {
+    await savePost(projectId);
+    return { saved: true };
+  }
+}
+
+
 
 export async function isLiked(projectId: number) {
   const user = await getCurrentUser()
@@ -627,18 +634,31 @@ export async function isLiked(projectId: number) {
   }
   return (count ?? 0) > 0
 }
-
-export async function isSaved(projectId: number) {
-  const user = await getCurrentUser()
-  const supabase = await createClient()
+// Normalize and fetch the current user's BIGINT[] of saved project IDs
+async function getMySavedIdsRaw(userId: string): Promise<number[]> {
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from("Profiles")
     .select("saved_projects")
-    .eq("id", user.user.id)
-    .single()
-  if (error) return false
-  return (data.saved_projects ?? []).includes(projectId)
+    .eq("id", userId)
+    .single();
+
+  if (error) throw error;
+
+  const raw = (data?.saved_projects ?? []) as unknown[];
+  return raw
+    .map((x) => (typeof x === "number" ? x : Number(x)))
+    .filter((n) => Number.isFinite(n)) as number[];
 }
+
+export async function isSaved(projectId: number) {
+  const user = await getCurrentUser();
+  if (!user?.user?.id) return false;
+
+  const ids = await getMySavedIdsRaw(user.user.id);
+  return ids.includes(projectId);
+}
+
 
 export async function addComment(projectId: number, comment: string) {
   const supabase = await createClient()
@@ -740,92 +760,107 @@ export async function getComments(projectId: number) {
     avatar_url: comment.Profiles?.avatar_url,
   }))
 }
-function toUuidArray(raw: unknown): string[] {
-  const arr = Array.isArray(raw) ? raw : [];
-  const uuidRE =
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-  return arr
-    .map((x) => (typeof x === "string" ? x : String(x)))
-    .filter((s) => uuidRE.test(s));
+
+export type NotificationType = "like" | "comment" | "follow"
+
+export type NotificationRow = 
+{
+  notification_id: number
+  user_id: string
+  actor_id: string
+  project_id: number | null
+  type: NotificationType
+  is_read: boolean | null
+  created_at: string
 }
 
-/** Is the project's creator saved by the current user? */
-export async function isProjectSavedByCreator(creatorUserId: string): Promise<boolean> {
-  const supabase = await createClient();
-  const { user } = await getCurrentUser();
-  const uid = user?.id;
-  if (!uid || !creatorUserId) return false;
+export type NotificationWithActor = NotificationRow & 
+{
+  actor_profile: {
+    id: string
+    username: string | null
+    avatar_url: string | null
+    full_name: string | null
+  } | null
+}
 
-  const { data, error } = await supabase
-    .from("Profiles")
-    .select("saved_projects")
-    .eq("id", uid)
-    .single();
+export async function unreadNotificationsCount(): Promise<number> 
+{
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return 0
 
-  if (error) {
-    console.error("isProjectSavedByCreator error:", error);
-    return false;
+  const { count, error } = await supabase
+    .from("notifications")
+    .select("notification_id", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .or("is_read.is.false,is_read.is.null")
+
+  if (error) return 0
+  return count ?? 0
+}
+
+export async function markAllNotificationsRead(): Promise<void> 
+{
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+
+  await supabase
+    .from("notifications")
+    .update({ is_read: true })
+    .eq("user_id", user.id)
+    .or("is_read.is.false,is_read.is.null")
+}
+
+export async function fetchNotifications(limit = 50): Promise<NotificationWithActor[]> 
+{
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
+
+  const { data: notifs } = await supabase
+    .from("notifications")
+    .select("notification_id, user_id, actor_id, project_id, type, is_read, created_at")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(limit)
+
+  const notifications = notifs ?? []
+  const actorIds = Array.from(new Set(notifications.map(n => n.actor_id).filter(Boolean)))
+
+  let profilesById: Record<string, { id: string; username: string | null; avatar_url: string | null; full_name: string | null }> = {}
+  if (actorIds.length) {
+    const { data: profiles } = await supabase
+      .from("Profiles")
+      .select("id, username, avatar_url, full_name")
+      .in("id", actorIds)
+    profilesById = Object.fromEntries((profiles ?? []).map(p => [p.id, p]))
   }
-
-  const saved = toUuidArray(data?.saved_projects);
-  return saved.includes(creatorUserId);
+  return notifications.map(n => ({
+    ...n,
+    actor_profile: profilesById[n.actor_id] ?? null,
+  }))
 }
 
-/** Toggle saving the *creator UUID* in Profiles.saved_projects (uuid[]) */
-export async function toggleSaveByCreator(
-  creatorUserId: string,
-  currentlySaved: boolean
-) {
+export async function getMySavedProjectIds(): Promise<number[]> {
   const supabase = await createClient();
   const { user } = await getCurrentUser();
-  const uid = user?.id;
-  if (!uid) throw new Error("Not signed in");
-  if (!creatorUserId) throw new Error("Missing creatorUserId");
+  if (!user?.id) return [];
+  return getMySavedIdsRaw(user.id);
+}
+
+export async function getMySavedProjects(): Promise<Tables<"Project">[]> {
+  const supabase = await createClient();
+  const ids = await getMySavedProjectIds();
+  if (ids.length === 0) return [];
 
   const { data, error } = await supabase
-    .from("Profiles")
-    .select("saved_projects")
-    .eq("id", uid)
-    .single();
-  if (error) throw error;
-
-  const prev = toUuidArray(data?.saved_projects);
-  const next = currentlySaved
-    ? prev.filter((id) => id !== creatorUserId)
-    : prev.includes(creatorUserId)
-    ? prev
-    : [...prev, creatorUserId];
-
-  const { error: upErr } = await supabase
-    .from("Profiles")
-    .update({ saved_projects: next })
-    .eq("id", uid);
-  if (upErr) throw upErr;
-}
-
-/** Saved page: show projects by saved *creators* */
-export async function getMySavedProjects() {
-  const supabase = await createClient();
-  const { user } = await getCurrentUser();
-  const uid = user?.id;
-  if (!uid) return [];
-
-  const { data: prof, error } = await supabase
-    .from("Profiles")
-    .select("saved_projects")
-    .eq("id", uid)
-    .single();
-  if (error) throw error;
-
-  const creatorIds = toUuidArray(prof?.saved_projects);
-  if (creatorIds.length === 0) return [];
-
-  const { data: projects, error: e2 } = await supabase
     .from("Project")
     .select("*")
-    .in("user_id", creatorIds) // filter by CREATOR uuid
+    .in("project_id", ids)
     .order("created_at", { ascending: false });
-  if (e2) throw e2;
 
-  return projects ?? [];
+  if (error) throw error;
+  return (data ?? []) as Tables<"Project">[];
 }
