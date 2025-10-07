@@ -575,51 +575,6 @@ export async function unlikePost(projectId: number) {
   }
 }
 
-export async function savePost(projectId: number) {
-  const user = await getCurrentUser();
-  if (!user?.user?.id) return { success: false, error: "User not found" };
-
-  const supabase = await createClient();
-  const ids = await getMySavedIdsRaw(user.user.id);
-  if (!ids.includes(projectId)) ids.push(projectId);
-
-  const { error } = await supabase
-    .from("Profiles")
-    .update({ saved_projects: ids })
-    .eq("id", user.user.id);
-
-  return { success: !error, error: error ?? null };
-}
-
-
-export async function unsavePost(projectId: number) {
-  const user = await getCurrentUser();
-  if (!user?.user?.id) return { success: false, error: "User not found" };
-
-  const supabase = await createClient();
-  const ids = await getMySavedIdsRaw(user.user.id);
-  const next = ids.filter((id) => id !== projectId);
-
-  const { error } = await supabase
-    .from("Profiles")
-    .update({ saved_projects: next })
-    .eq("id", user.user.id);
-
-  return { success: !error, error: error ?? null };
-}
-export async function toggleSavePost(projectId: number) {
-  const saved = await isSaved(projectId);
-  if (saved) {
-    await unsavePost(projectId);
-    return { saved: false };
-  } else {
-    await savePost(projectId);
-    return { saved: true };
-  }
-}
-
-
-
 export async function isLiked(projectId: number) {
   const user = await getCurrentUser()
   const supabase = await createClient()
@@ -634,31 +589,6 @@ export async function isLiked(projectId: number) {
   }
   return (count ?? 0) > 0
 }
-// Normalize and fetch the current user's BIGINT[] of saved project IDs
-async function getMySavedIdsRaw(userId: string): Promise<number[]> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("Profiles")
-    .select("saved_projects")
-    .eq("id", userId)
-    .single();
-
-  if (error) throw error;
-
-  const raw = (data?.saved_projects ?? []) as unknown[];
-  return raw
-    .map((x) => (typeof x === "number" ? x : Number(x)))
-    .filter((n) => Number.isFinite(n)) as number[];
-}
-
-export async function isSaved(projectId: number) {
-  const user = await getCurrentUser();
-  if (!user?.user?.id) return false;
-
-  const ids = await getMySavedIdsRaw(user.user.id);
-  return ids.includes(projectId);
-}
-
 
 export async function addComment(projectId: number, comment: string) {
   const supabase = await createClient()
@@ -837,4 +767,93 @@ export async function fetchNotifications(limit = 50): Promise<NotificationWithAc
     ...n,
     actor_profile: profilesById[n.actor_id] ?? null,
   }))
+}
+// Normalize and fetch the current user's BIGINT[] of saved project IDs
+async function getMySavedIdsRaw(userId: string): Promise<number[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("Profiles")
+    .select("saved_projects")
+    .eq("id", userId)
+    .single();
+
+  if (error) throw error;
+
+  const raw = (data?.saved_projects ?? []) as unknown[];
+  return raw
+    .map((x) => (typeof x === "number" ? x : Number(x)))
+    .filter((n) => Number.isFinite(n)) as number[];
+}
+
+export async function getMySavedProjectIds(): Promise<number[]> {
+  const supabase = await createClient();
+  const user = await getCurrentUser();
+  if (!user?.user?.id) return [];
+  return getMySavedIdsRaw(user.user.id);
+}
+
+export async function isSaved(projectId: number) {
+  const user = await getCurrentUser();
+  if (!user?.user?.id) return false;
+
+  const ids = await getMySavedIdsRaw(user.user.id);
+  return ids.includes(projectId);
+}
+
+export async function savePost(projectId: number) {
+  const user = await getCurrentUser();
+  if (!user?.user?.id) return { success: false, error: "User not found" };
+
+  const supabase = await createClient();
+  const ids = await getMySavedIdsRaw(user.user.id);
+  if (!ids.includes(projectId)) ids.push(projectId);
+
+  const { error } = await supabase
+    .from("Profiles")
+    .update({ saved_projects: ids })
+    .eq("id", user.user.id);
+
+  return { success: !error, error: error ?? null };
+}
+
+export async function unsavePost(projectId: number) {
+  const user = await getCurrentUser();
+  if (!user?.user?.id) return { success: false, error: "User not found" };
+
+  const supabase = await createClient();
+  const ids = await getMySavedIdsRaw(user.user.id);
+  const next = ids.filter((id) => id !== projectId);
+
+  const { error } = await supabase
+    .from("Profiles")
+    .update({ saved_projects: next })
+    .eq("id", user.user.id);
+
+  return { success: !error, error: error ?? null };
+}
+
+export async function toggleSavePost(projectId: number) {
+  const saved = await isSaved(projectId);
+  if (saved) {
+    await unsavePost(projectId);
+    return { saved: false };
+  } else {
+    await savePost(projectId);
+    return { saved: true };
+  }
+}
+
+export async function getMySavedProjects(): Promise<Tables<"Project">[]> {
+  const supabase = await createClient();
+  const ids = await getMySavedProjectIds();
+  if (ids.length === 0) return [];
+
+  const { data, error } = await supabase
+    .from("Project")
+    .select("*")
+    .in("project_id", ids)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  return (data ?? []) as Tables<"Project">[];
 }
