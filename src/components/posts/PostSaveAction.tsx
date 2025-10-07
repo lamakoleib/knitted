@@ -1,38 +1,61 @@
 "use client";
 
-import { useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState, useTransition } from "react";
 import { Bookmark } from "lucide-react";
-import { toggleSaveByCreator } from "@/lib/db-actions";
+import { toggleSavePost } from "@/lib/db-actions";
+
+type Props = {
+  projectId: number;
+  initialSaved?: boolean;
+  /** kept for backward compatibility with existing usages; no navigation happens */
+  profileIdForRoute?: string;
+};
 
 export default function PostSaveAction({
-  creatorUserId,        // author's UUID
-  initialSaved,
-  profileIdForRoute,    // current viewer's profile id (uuid)
-}: {
-  creatorUserId: string;
-  initialSaved: boolean;
-  profileIdForRoute: string;
-}) {
-  const [isPending, startTransition] = useTransition();
-  const router = useRouter();
+  projectId,
+  initialSaved = false,
+}: Props) {
+  // Seed from server, and keep in sync if parent changes it (e.g., route change)
+  const [saved, setSaved] = useState<boolean>(!!initialSaved);
+  useEffect(() => {
+    setSaved(!!initialSaved);
+  }, [initialSaved, projectId]);
 
-  const onClick = () => {
+  const [isPending, startTransition] = useTransition();
+
+  const onToggle = () => {
+    // Optimistic UI update
+    setSaved((s) => !s);
+
     startTransition(async () => {
-      await toggleSaveByCreator(creatorUserId, initialSaved);
-      router.push(`/home/profile/${profileIdForRoute}/saved`);
+      try {
+        await toggleSavePost(projectId);
+        // If you ever need to revalidate server components on this page without navigating:
+        // const router = useRouter(); router.refresh();
+      } catch (err) {
+        console.error("toggleSavePost failed:", err);
+        // Roll back if the server action fails
+        setSaved((s) => !s);
+      }
     });
   };
 
   return (
     <button
-      onClick={onClick}
+      type="button"
+      aria-label={saved ? "Unsave project" : "Save project"}
+      aria-pressed={saved}
+      onClick={onToggle}
       disabled={isPending}
-      className="inline-flex h-8 w-8 items-center justify-center focus:outline-none"
-      title="Save creator and open Saved"
-      aria-label="Save"
+      className="focus:outline-none disabled:opacity-60"
+      title={saved ? "Saved" : "Save"}
     >
-      <Bookmark className={`h-5 w-5 ${initialSaved ? "fill-current" : ""}`} />
+      <Bookmark
+        size={20}
+        className={saved ? "text-primary" : "text-muted-foreground"}
+        // Lucide fills when fill="currentColor"
+        fill={saved ? "currentColor" : "none"}
+      />
     </button>
   );
 }
