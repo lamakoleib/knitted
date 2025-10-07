@@ -691,17 +691,10 @@ export async function getComments(projectId: number) {
   }))
 }
 
-<<<<<<< HEAD
 // --- Notifications (keep only one copy) ---
 export type NotificationType = "like" | "comment" | "follow"
 
 export type NotificationRow = {
-=======
-export type NotificationType = "like" | "comment" | "follow"
-
-export type NotificationRow = 
-{
->>>>>>> 4bf32de3b286d682be6639558a3530000e9328e0
   notification_id: number
   user_id: string
   actor_id: string
@@ -711,12 +704,7 @@ export type NotificationRow =
   created_at: string
 }
 
-<<<<<<< HEAD
 export type NotificationWithActor = NotificationRow & {
-=======
-export type NotificationWithActor = NotificationRow & 
-{
->>>>>>> 4bf32de3b286d682be6639558a3530000e9328e0
   actor_profile: {
     id: string
     username: string | null
@@ -725,12 +713,7 @@ export type NotificationWithActor = NotificationRow &
   } | null
 }
 
-<<<<<<< HEAD
 export async function unreadNotificationsCount(): Promise<number> {
-=======
-export async function unreadNotificationsCount(): Promise<number> 
-{
->>>>>>> 4bf32de3b286d682be6639558a3530000e9328e0
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return 0
@@ -745,12 +728,7 @@ export async function unreadNotificationsCount(): Promise<number>
   return count ?? 0
 }
 
-<<<<<<< HEAD
 export async function markAllNotificationsRead(): Promise<void> {
-=======
-export async function markAllNotificationsRead(): Promise<void> 
-{
->>>>>>> 4bf32de3b286d682be6639558a3530000e9328e0
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return
@@ -762,12 +740,7 @@ export async function markAllNotificationsRead(): Promise<void>
     .or("is_read.is.false,is_read.is.null")
 }
 
-<<<<<<< HEAD
 export async function fetchNotifications(limit = 50): Promise<NotificationWithActor[]> {
-=======
-export async function fetchNotifications(limit = 50): Promise<NotificationWithActor[]> 
-{
->>>>>>> 4bf32de3b286d682be6639558a3530000e9328e0
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return []
@@ -795,7 +768,6 @@ export async function fetchNotifications(limit = 50): Promise<NotificationWithAc
     actor_profile: profilesById[n.actor_id] ?? null,
   }))
 }
-<<<<<<< HEAD
 // Normalize and fetch the current user's BIGINT[] of saved project IDs
 async function getMySavedIdsRaw(userId: string): Promise<number[]> {
   const supabase = await createClient();
@@ -885,5 +857,3 @@ export async function getMySavedProjects(): Promise<Tables<"Project">[]> {
   if (error) throw error;
   return (data ?? []) as Tables<"Project">[];
 }
-=======
->>>>>>> 4bf32de3b286d682be6639558a3530000e9328e0
