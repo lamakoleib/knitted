@@ -10,14 +10,7 @@ import type { FeedPost } from "@/types/feed";
 import { Input } from "@/components/ui/input";
 import { Heart, MessageCircle, Plus } from "lucide-react";
 import { formatPostTime } from "@/utils/format-date";
-import {
-  isLiked,
-  likePost,
-  unlikePost,
-  addComment,
-  getComments,
-  isProjectSavedByCreator,
-} from "@/lib/db-actions";
+import { isLiked, likePost, unlikePost, addComment, getComments } from "@/lib/db-actions";
 import { Tables } from "@/types/database.types";
 import PostSaveAction from "@/components/posts/PostSaveAction";
 
@@ -33,34 +26,30 @@ type Comment = {
 export function PostCard({
   post,
   profile,
+  initialSaved = false, // ✅ new prop from server
 }: {
   post: FeedPost;
   profile: Tables<"Profiles">;
+  initialSaved?: boolean;
 }) {
   const [liked, setLiked] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const [saved, setSaved] = useState(initialSaved); // ✅ seed from server
   const [likeCount, setLikeCount] = useState(post.like_count);
   const [comments, setComments] = useState<Comment[]>([]);
   const [isLoadingComments, setIsLoadingComments] = useState(false);
+  const [showAllComments, setShowAllComments] = useState(false);
+  const [commentText, setCommentText] = useState("");
 
   const creatorId = post.Profiles?.id ?? ""; // author's UUID
 
   useEffect(() => {
     const fetchStatus = async () => {
-      setLiked(await isLiked(post.project_id));
-      if (creatorId) {
-        setSaved(await isProjectSavedByCreator(creatorId));
-      } else {
-        setSaved(false);
-      }
+      setLiked(await isLiked(post.project_id)); // only fetch likes
       fetchComments();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     fetchStatus();
-  }, [post.project_id, creatorId]);
-
-  const [showAllComments, setShowAllComments] = useState(false);
-  const [commentText, setCommentText] = useState("");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [post.project_id]);
 
   const fetchComments = async () => {
     setIsLoadingComments(true);
@@ -144,8 +133,8 @@ export function PostCard({
               <Heart size={20} className={liked ? "fill-red-500 text-red-500" : ""} />
             </button>
             <PostSaveAction
-              creatorUserId={creatorId}
-              initialSaved={!!saved}
+              projectId={post.project_id} // ✅ use project ID (BIGINT)
+              initialSaved={saved}         // ✅ from server
               profileIdForRoute={profile?.id ?? ""}
             />
           </span>
