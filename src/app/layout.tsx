@@ -1,16 +1,21 @@
 import "./globals.css"
-export default function RootLayout({
-	children,
-}: Readonly<{
-	children: React.ReactNode
-}>) {
-	return (
-		<html lang="en">
-			<meta name="apple-mobile-web-app-title" content="knitted" />
-			<link rel="shortcut icon" href="/favicon.ico" />
-			<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+import type { Metadata } from "next";
 
-			<body>{children}</body>
-		</html>
-	)
+export const metadata: Metadata = {
+  title: "Knitted",
+  description: "Share and discover knitting projects",
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body className="min-h-screen bg-background text-foreground">
+        {children}
+      </body>
+    </html>
+  );
 }

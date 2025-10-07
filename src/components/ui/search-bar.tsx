@@ -36,7 +36,7 @@ export default function SearchBar({ searchTerm, setSearchTerm, handleSearch }: {
     <div className="flex items-center gap-2 w-full max-w-lg mx-auto bg-red-300/60 p-3 rounded-full shadow">
       <Input
         type="text"
-        placeholder="Search profiles..."
+        placeholder="Search..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
         className="flex-1 border-none outline-none focus:ring-0 bg-transparent text-black"
