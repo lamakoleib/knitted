@@ -1,41 +1,47 @@
-import Link from "next/link"
-import { getCurrentUserProfile, getPostDataByID } from "@/lib/db-actions"
-import { PostCard } from "../../feed/components/post-card"
-import { Button } from "@/components/ui/button"
+import Link from "next/link";
+import { getCurrentUserProfile, getPostDataByID, isSaved } from "@/lib/db-actions";
+import { PostCard } from "../../feed/components/post-card";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { MoreHorizontal, Bookmark, Ban, Pencil } from "lucide-react"
+} from "@/components/ui/dropdown-menu";
+import { MoreHorizontal, Bookmark, Ban, Pencil } from "lucide-react";
+
 /**
- * Renders the project details page.
- *
- * Displays a single project's post content along with metadata such as yarn type,
- * difficulty, needle size, status, tags, and more. If the user is the owner of the project,
- * edit, archive, and delete options are shown via a dropdown menu.
- *
- * @param params - URL parameters containing the `projectId`.
- * @returns The project detail view.
+ * Project details page.
+ * Always checks DB to see if THIS user saved the project, and seeds PostCard with that.
  */
 export default async function ProjectDetailsPage({
   params,
 }: {
-  params: Promise<{ projectId: string }>
+  // In Next.js 15 these are Promises
+  params: Promise<{ projectId: string }>;
 }) {
-  const { projectId } = await params
-  const project = await getPostDataByID(projectId)
-  const profile = await getCurrentUserProfile()
+  // await dynamic apis
+  const { projectId } = await params;
 
-  const isOwner = project.user_id === profile.id
+  const [project, profile, initialSaved] = await Promise.all([
+    getPostDataByID(projectId),
+    getCurrentUserProfile(),
+    // 🔑 DB truth: is this project saved by the current user?
+    isSaved(Number(projectId)),
+  ]);
+
+  if (!project) {
+    return <div className="p-6">Project not found.</div>;
+  }
+
+  const isOwner = project.user_id === profile.id;
 
   return (
     <div className="bg-muted p-4 md:p-12 min-h-screen w-full">
       <div className="max-w-[1000px] mx-auto grid grid-cols-1 md:grid-cols-[1.5fr_2fr] gap-6 md:gap-10">
-
         <div className="relative">
-          <PostCard post={project} profile={profile} />
+          {/* Seed bookmark with DB-verified saved state */}
+          <PostCard post={project} profile={profile} initialSaved={initialSaved} />
 
           {isOwner && (
             <div className="absolute top-4 right-4">
@@ -60,7 +66,6 @@ export default async function ProjectDetailsPage({
                       </div>
                     </Link>
                   </DropdownMenuItem>
-
                   <DropdownMenuItem asChild>
                     <Link href={`/home/projects/${project.project_id}/delete`}>
                       <div className="flex items-center text-red-600">
@@ -84,12 +89,11 @@ export default async function ProjectDetailsPage({
 
           <h2 className="text-lg font-semibold">Project Information</h2>
           <ul className="mt-2 space-y-2 text-gray-700">
-          <li>
+            <li>
               <strong>Project Status:</strong> {project.status}
             </li>
             <li>
-              <strong>Yarn Types:</strong>{" "}
-              {project.yarn?.join(", ") || "Not specified"}
+              <strong>Yarn Types:</strong> {project.yarn?.join(", ") || "Not specified"}
             </li>
             <li>
               <strong>Pattern:</strong> {project.pattern}
@@ -108,16 +112,13 @@ export default async function ProjectDetailsPage({
           </ul>
 
           <hr className="my-4 border-gray-300" />
-          {/* Tags */}
+
           {project.tags && project.tags.length > 0 && (
             <div>
               <h2 className="text-lg font-semibold text-gray-800">Tags</h2>
               <div className="flex flex-wrap mt-2 gap-2">
-                {project.tags.map((tag, index) => (
-                  <span
-                    key={index}
-                    className="px-3 py-1 bg-red-300 text-red-700 rounded-full text-sm"
-                  >
+                {project.tags.map((tag: string, i: number) => (
+                  <span key={i} className="px-3 py-1 bg-red-300 text-red-700 rounded-full text-sm">
                     #{tag}
                   </span>
                 ))}
@@ -127,5 +128,5 @@ export default async function ProjectDetailsPage({
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -575,44 +575,6 @@ export async function unlikePost(projectId: number) {
   }
 }
 
-export async function savePost(projectId: number) {
-  const user = await getCurrentUser()
-  if (!user || !user.user?.id) return { error: "User not found" }
-
-  const supabase = await createClient()
-
-  const { error } = await supabase
-    .from("Profiles")
-    .update({
-      saved_projects: supabase.rpc("array_append", {
-        column: "saved_projects",
-        value: projectId,
-      }),
-    })
-    .eq("id", user.user.id)
-
-  return { success: !error, error }
-}
-
-export async function unsavePost(projectId: number) {
-  const user = await getCurrentUser()
-  if (!user || !user.user?.id) return { error: "User not found" }
-
-  const supabase = await createClient()
-
-  const { error } = await supabase
-    .from("Profiles")
-    .update({
-      saved_projects: supabase.rpc("array_remove", {
-        column: "saved_projects",
-        value: projectId,
-      }),
-    })
-    .eq("id", user.user.id)
-
-  return { success: !error, error }
-}
-
 export async function isLiked(projectId: number) {
   const user = await getCurrentUser()
   const supabase = await createClient()
@@ -626,18 +588,6 @@ export async function isLiked(projectId: number) {
     return false
   }
   return (count ?? 0) > 0
-}
-
-export async function isSaved(projectId: number) {
-  const user = await getCurrentUser()
-  const supabase = await createClient()
-  const { data, error } = await supabase
-    .from("Profiles")
-    .select("saved_projects")
-    .eq("id", user.user.id)
-    .single()
-  if (error) return false
-  return (data.saved_projects ?? []).includes(projectId)
 }
 
 export async function addComment(projectId: number, comment: string) {
@@ -741,10 +691,10 @@ export async function getComments(projectId: number) {
   }))
 }
 
+// --- Notifications (keep only one copy) ---
 export type NotificationType = "like" | "comment" | "follow"
 
-export type NotificationRow = 
-{
+export type NotificationRow = {
   notification_id: number
   user_id: string
   actor_id: string
@@ -754,8 +704,7 @@ export type NotificationRow =
   created_at: string
 }
 
-export type NotificationWithActor = NotificationRow & 
-{
+export type NotificationWithActor = NotificationRow & {
   actor_profile: {
     id: string
     username: string | null
@@ -764,8 +713,7 @@ export type NotificationWithActor = NotificationRow &
   } | null
 }
 
-export async function unreadNotificationsCount(): Promise<number> 
-{
+export async function unreadNotificationsCount(): Promise<number> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return 0
@@ -780,8 +728,7 @@ export async function unreadNotificationsCount(): Promise<number>
   return count ?? 0
 }
 
-export async function markAllNotificationsRead(): Promise<void> 
-{
+export async function markAllNotificationsRead(): Promise<void> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return
@@ -793,8 +740,7 @@ export async function markAllNotificationsRead(): Promise<void>
     .or("is_read.is.false,is_read.is.null")
 }
 
-export async function fetchNotifications(limit = 50): Promise<NotificationWithActor[]> 
-{
+export async function fetchNotifications(limit = 50): Promise<NotificationWithActor[]> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return []
@@ -821,4 +767,93 @@ export async function fetchNotifications(limit = 50): Promise<NotificationWithAc
     ...n,
     actor_profile: profilesById[n.actor_id] ?? null,
   }))
+}
+// Normalize and fetch the current user's BIGINT[] of saved project IDs
+async function getMySavedIdsRaw(userId: string): Promise<number[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("Profiles")
+    .select("saved_projects")
+    .eq("id", userId)
+    .single();
+
+  if (error) throw error;
+
+  const raw = (data?.saved_projects ?? []) as unknown[];
+  return raw
+    .map((x) => (typeof x === "number" ? x : Number(x)))
+    .filter((n) => Number.isFinite(n)) as number[];
+}
+
+export async function getMySavedProjectIds(): Promise<number[]> {
+  const supabase = await createClient();
+  const user = await getCurrentUser();
+  if (!user?.user?.id) return [];
+  return getMySavedIdsRaw(user.user.id);
+}
+
+export async function isSaved(projectId: number) {
+  const user = await getCurrentUser();
+  if (!user?.user?.id) return false;
+
+  const ids = await getMySavedIdsRaw(user.user.id);
+  return ids.includes(projectId);
+}
+
+export async function savePost(projectId: number) {
+  const user = await getCurrentUser();
+  if (!user?.user?.id) return { success: false, error: "User not found" };
+
+  const supabase = await createClient();
+  const ids = await getMySavedIdsRaw(user.user.id);
+  if (!ids.includes(projectId)) ids.push(projectId);
+
+  const { error } = await supabase
+    .from("Profiles")
+    .update({ saved_projects: ids })
+    .eq("id", user.user.id);
+
+  return { success: !error, error: error ?? null };
+}
+
+export async function unsavePost(projectId: number) {
+  const user = await getCurrentUser();
+  if (!user?.user?.id) return { success: false, error: "User not found" };
+
+  const supabase = await createClient();
+  const ids = await getMySavedIdsRaw(user.user.id);
+  const next = ids.filter((id) => id !== projectId);
+
+  const { error } = await supabase
+    .from("Profiles")
+    .update({ saved_projects: next })
+    .eq("id", user.user.id);
+
+  return { success: !error, error: error ?? null };
+}
+
+export async function toggleSavePost(projectId: number) {
+  const saved = await isSaved(projectId);
+  if (saved) {
+    await unsavePost(projectId);
+    return { saved: false };
+  } else {
+    await savePost(projectId);
+    return { saved: true };
+  }
+}
+
+export async function getMySavedProjects(): Promise<Tables<"Project">[]> {
+  const supabase = await createClient();
+  const ids = await getMySavedProjectIds();
+  if (ids.length === 0) return [];
+
+  const { data, error } = await supabase
+    .from("Project")
+    .select("*")
+    .in("project_id", ids)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  return (data ?? []) as Tables<"Project">[];
 }
