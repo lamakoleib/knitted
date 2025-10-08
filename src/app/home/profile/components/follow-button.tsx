@@ -1,4 +1,7 @@
 "use client"
+
+import { useTransition } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { insertFollower } from "@/lib/db-actions"
 /**
@@ -10,12 +13,24 @@ import { insertFollower } from "@/lib/db-actions"
  * @returns The follow button component.
  */
 export default function Follow({ profileId }: { profileId: string }) {
-	return (
-		<Button
-			onClick={() => insertFollower(profileId)}
-			className="bg-red-300 text-primary-foreground hover:bg-red-300/90"
-		>
-			Follow
-		</Button>
-	)
+  const [isPending, startTransition] = useTransition()
+  const router = useRouter()
+
+  return (
+    <Button
+      disabled={isPending}
+      onClick={() =>
+        startTransition(async () => {
+          try {
+            await insertFollower(profileId)
+          } finally {
+            router.refresh()
+          }
+        })
+      }
+      className="bg-red-300 text-primary-foreground hover:bg-red-300/90"
+    >
+      {isPending ? "Following..." : "Follow"}
+    </Button>
+  )
 }
