@@ -231,7 +231,7 @@ export async function getFollowersByUserID(
   const { data, error } = await supabase
     .from("Followers")
     .select("*")
-    .eq("user_id", id)
+    .eq("followers_id", id)
     .returns<Tables<"Followers">[]>()
   if (error) throw error
   const followers: Tables<"Followers">[] = data!
@@ -245,7 +245,7 @@ export async function getFollowingByUserID(
   const { data, error } = await supabase
     .from("Followers")
     .select("*")
-    .eq("follower_id", id)
+    .eq("user_id", id)
     .returns<Tables<"Followers">[]>()
   if (error) throw error
   const following: Tables<"Followers">[] = data!
