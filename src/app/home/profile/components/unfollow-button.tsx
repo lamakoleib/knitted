@@ -1,6 +1,9 @@
 "use client"
+
+import { useTransition } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { unfollow, isFollowing } from "@/lib/db-actions"
+import { unfollow } from "@/lib/db-actions"
 /**
  * Renders an "Unfollow" button for a given profile.
  *
@@ -10,13 +13,25 @@ import { unfollow, isFollowing } from "@/lib/db-actions"
  * @returns The unfollow button component.
  */
 export default function Unfollow({ profileId }: { profileId: string }) {
-	return (
-		<Button
-			onClick={() => unfollow(profileId)}
-			variant="outline"
-			className="text-red-300 hover:bg-red-300/90"
-		>
-			Unfollow
-		</Button>
-	)
+  const [isPending, startTransition] = useTransition()
+  const router = useRouter()
+
+  return (
+    <Button
+      variant="outline"
+      disabled={isPending}
+      onClick={() =>
+        startTransition(async () => {
+          try {
+            await unfollow(profileId)
+          } finally {
+            router.refresh()
+          }
+        })
+      }
+      className="text-red-300 hover:bg-red-300/90"
+    >
+      {isPending ? "Unfollowing..." : "Unfollow"}
+    </Button>
+  )
 }
