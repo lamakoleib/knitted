@@ -1,4 +1,4 @@
-import { getPostDataByID } from "@/lib/db-actions";
+import { getPostDataByID, getTaggedUsersForProject } from "@/lib/db-actions";
 import EditForm from "./EditForm";
 /**
  * Page component for editing an existing project.
@@ -8,12 +8,27 @@ import EditForm from "./EditForm";
  * @param params - URL params containing the `projectId`.
  * @returns The edit project page.
  */
-export default async function EditProjectPage({ params }: { params: { projectId: string } }) {
-  const project = await getPostDataByID(params.projectId);
+export default async function EditProjectPage({
+  params,
+}: { params: Promise<{ projectId: string }> }) {
+  const { projectId } = await params;
+
+  const project = await getPostDataByID(projectId);
+  if (!project) return <div className="p-6">Project not found.</div>;
+  const taggedUsers = await getTaggedUsersForProject(projectId);
+  const initialTaggedUsernames = taggedUsers
+    .map(u => u.username || "")
+    .filter(Boolean)
+    .join(", ");
+
   return (
-    <div className="container max-w-3xl mx-auto py-8 px-4">
-      <h1 className="text-3xl font-bold mb-4">Edit Project</h1>
-      <EditForm project={project} />
+    <div className="bg-muted min-h-screen p-6">
+      <div className="mx-auto max-w-3xl">
+        <EditForm
+          project={project}
+          initialTaggedUsernames={initialTaggedUsernames}
+        />
+      </div>
     </div>
   );
 }
