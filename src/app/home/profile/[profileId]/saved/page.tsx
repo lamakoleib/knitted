@@ -22,7 +22,7 @@ export default async function ProfileSavedPage() {
         {projects.map((p: Tables<"Project">) => (
           <Link
             key={p.project_id}
-            href={`/home/projects/${p.project_id}?saved=1`}  // ✅ tell details page it’s saved
+            href={`/home/projects/${p.project_id}?saved=1`}
             className="aspect-square relative group cursor-pointer overflow-hidden rounded-md"
           >
             <Image

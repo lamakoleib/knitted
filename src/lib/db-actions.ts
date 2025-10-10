@@ -387,7 +387,7 @@ export async function uploadProject(
   prevState: ActionResponse | null,
   formData: FormData
 ): Promise<ActionResponse> {
-  console.log("Uploading project...")
+  console.log("Uploading project…")
   const validatedFields = projectSchema.safeParse({
     title: formData.get("title"),
     description: formData.get("description"),
@@ -417,34 +417,27 @@ export async function uploadProject(
     const supabase = await createClient()
     const user = await getCurrentUser()
     for (const image of images) {
-      console.log("Image:" + image.name)
-      const fileName = `${Date.now()}-${image.name
-        .replace(/\s+/g, "-")
-        .toLowerCase()}`
+      const fileName = `${Date.now()}-${image.name.replace(/\s+/g, "-").toLowerCase()}`
       const filePath = `${user.user.id}/${folderPath}/${fileName}`
 
       const arrayBuf = await image.arrayBuffer()
-      const { data: uploadData, error } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from("knitted-images")
         .upload(filePath, arrayBuf, {
           contentType: image.type,
           cacheControl: "3600",
           upsert: false,
         })
-      console.log("Uploaded images")
-
-      if (error) {
-        console.error("Error uploading to Supabase:", error)
-        throw new Error(`Failed to upload image: ${error.message}`)
+      if (uploadError) {
+        console.error("Error uploading to Supabase:", uploadError)
+        throw new Error(`Failed to upload image: ${uploadError.message}`)
       }
-      console.log("adding image" + fileName)
       const { data: publicUrlData } = supabase.storage
         .from("knitted-images")
         .getPublicUrl(filePath)
       imageUrls.push(publicUrlData.publicUrl)
     }
-    console.log("finished images")
-    const { data: projectData, error: insertError } = await supabase
+    const { data: projectRow, error: insertError } = await supabase
       .from("Project")
       .insert({
         title: data.title,
@@ -455,20 +448,54 @@ export async function uploadProject(
         difficulty: data.difficultyLevel,
         status: data.projectStatus,
         time_spent: data.timeSpent,
-        tags: data.tags ? data.tags.split(",").map((tag) => tag.trim()) : [],
+        tags: data.tags ? data.tags.split(",").map((t) => t.trim()) : [],
         images: imageUrls,
         user_id: user.user.id,
       })
-      .select()
+      .select("project_id")
+      .single()
     if (insertError) {
       console.log("Error inserting project data:", insertError)
       throw new Error(`Failed to save project: ${insertError.message}`)
     }
-    console.log("Inserted data!")
+
+    const projectId = projectRow.project_id
+    const rawTagged = (formData.get("taggedUsernames") as string | null) ?? ""
+    const usernames = rawTagged
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean)
+
+    if (usernames.length) {
+      const { data: profiles, error: lookupErr } = await supabase
+        .from("Profiles")
+        .select("id, username")
+        .in("username", usernames)
+
+      if (!lookupErr && profiles && profiles.length) 
+        {
+        const rows = profiles.map((p) => ({
+          project_id: projectId,
+          tagged_user: p.id,
+          tagged_by: user.user.id,
+        }))
+
+        const { error: tagErr } = await supabase
+          .from("project_tags")
+          .insert(rows)
+
+        if (tagErr) {
+          console.error("Failed inserting project_tags:", tagErr)
+        }
+      } else {
+        console.warn("No matching usernames to tag:", usernames)
+      }
+    }
+
     return {
       success: true,
       message: "Project created successfully!",
-      data: { ...data, imageUrls, id: projectData?.[0]?.id },
+      data: { ...data, imageUrls, id: projectId },
     }
   } catch (error) {
     console.error("Error creating project:", error)
@@ -856,4 +883,132 @@ export async function getMySavedProjects(): Promise<Tables<"Project">[]> {
 
   if (error) throw error;
   return (data ?? []) as Tables<"Project">[];
+}
+
+export async function tagUsersOnProject(
+  projectId: number,
+  taggedUserIds: string[]
+) {
+  if (!taggedUserIds?.length) return { success: true };
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: "Not authenticated" };
+  const rows = taggedUserIds.map((uid) => ({
+    project_id: projectId,
+    tagged_user: uid,
+    tagged_by: user.id,
+  }));
+
+  const { error } = await supabase
+    .from("project_tags")
+    .upsert(rows, { onConflict: "project_id,tagged_user", ignoreDuplicates: true });
+
+  return { success: !error, error };
+}
+
+export async function getTaggedProjectsByUserID(userId: string) 
+{
+  const supabase = await createClient()
+  const { data: projects, error } = await supabase
+    .from("Project")
+    .select(`
+      project_id,
+      title,
+      images,
+      user_id,
+      created_at,
+      project_tags!inner(tagged_user)
+    `)
+    .eq("project_tags.tagged_user", userId)
+    .order("created_at", { ascending: false })
+
+  if (error || !projects) return []
+
+  const projectsWithComments = await Promise.all(
+    projects.map(async (project) => {
+      const { count } = await supabase
+        .from("Comments")
+        .select("*", { count: "exact", head: true })
+        .eq("project_id", project.project_id)
+      return { ...project, comment_count: count ?? 0 }
+    })
+  )
+  return projectsWithComments
+}
+
+export async function updateProjectTagsByUsernames(
+  projectId: string | number,
+  taggedUsernamesCsv: string
+) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
+
+  const usernames = (taggedUsernamesCsv || "")
+    .split(",")
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  if (usernames.length === 0) {
+    const { error } = await supabase
+      .from("project_tags")
+      .delete()
+      .eq("project_id", projectId);
+    if (error) throw error;
+    return;
+  }
+
+  const { data: profiles, error: lookupErr } = await supabase
+    .from("Profiles")
+    .select("id, username")
+    .in("username", usernames);
+
+  if (lookupErr) throw lookupErr;
+
+  const taggedIds = (profiles ?? []).map(p => p.id);
+  const { error: delErr } = await supabase
+    .from("project_tags")
+    .delete()
+    .eq("project_id", projectId);
+  if (delErr) throw delErr;
+
+  if (taggedIds.length) {
+    const rows = taggedIds.map((uid) => ({
+      project_id: projectId,
+      tagged_user: uid,
+      tagged_by: user.id,
+    }));
+    const { error: insErr } = await supabase
+      .from("project_tags")
+      .insert(rows);
+    if (insErr) throw insErr;
+  }
+}
+
+export async function getTaggedUsersForProject(projectId: number | string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("project_tags")
+    .select(`
+      tagged_user,
+      Profiles:tagged_user (
+        id,
+        username,
+        full_name,
+        avatar_url
+      )
+    `)
+    .eq("project_id", projectId);
+
+  if (error) throw error;
+
+  return (data ?? [])
+    .map((row: any) => row?.Profiles)
+    .filter(Boolean) as Array<{
+      id: string;
+      username: string | null;
+      full_name: string | null;
+      avatar_url: string | null;
+    }>;
 }

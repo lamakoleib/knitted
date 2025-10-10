@@ -4,21 +4,50 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+import { Upload, X, Loader2 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from "@/components/ui/form";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
-import { Upload, X, Loader2 } from "lucide-react";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
-import { Command, CommandList, CommandGroup, CommandInput, CommandEmpty, CommandItem } from "@/components/ui/command";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandList,
+  CommandGroup,
+  CommandInput,
+  CommandEmpty,
+  CommandItem,
+} from "@/components/ui/command";
 import { cn } from "@/lib/utils";
-import { useRouter } from "next/navigation";
-import { updateProjectByID } from "@/lib/db-actions";
+
+import {
+  updateProjectByID,
+  updateProjectTagsByUsernames,
+} from "@/lib/db-actions";
 
 const YARN_TYPES = [
   { label: "Merino Wool", value: "merino-wool" },
@@ -61,6 +90,7 @@ const editSchema = z.object({
   projectStatus: z.string(),
   timeSpent: z.number().min(0).optional(),
   tags: z.string().optional(),
+  taggedUsernames: z.string().optional(),
 });
 /**
  * Renders an edit form for updating an existing knitting project.
@@ -73,26 +103,37 @@ const editSchema = z.object({
  * @param project - The existing project data to prefill the form with
  * @returns A fully featured form UI for editing a project
  */
-export default function EditForm({ project }: { project: any }) {
-    const router = useRouter();
-    const [images, setImages] = useState<File[]>([]);
-    const [imageUrls, setImageUrls] = useState<string[]>(project.image_urls || []);
-    const [isSubmitting, setIsSubmitting] = useState(false);
+type EditFormValues = z.infer<typeof editSchema>;
 
-    const form = useForm<z.infer<typeof editSchema>>({
-        resolver: zodResolver(editSchema),
-        defaultValues: {
-          title: project.title || "",
-          description: project.description || "",
-          yarnTypes: project.yarn || [],
-          pattern: project.pattern || "",
-          needleSize: project.needle_size || "",
-          difficultyLevel: project.difficulty || "",
-          projectStatus: project.status || "not-started",
-          timeSpent: project.time_spent || 0,
-          tags: project.tags?.join(", ") || "",
-        },
-      });
+type Props = {
+  project: any;
+  initialTaggedUsernames: string;
+};
+export default function EditForm({ project, initialTaggedUsernames }: Props) {
+  const router = useRouter();
+  const [images, setImages] = useState<File[]>([]);
+  const [imageUrls, setImageUrls] = useState<string[]>(
+    project.images || project.image_urls || []
+  );
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const form = useForm<EditFormValues>({
+    resolver: zodResolver(editSchema),
+    defaultValues: {
+      title: project.title || "",
+      description: project.description || "",
+      yarnTypes: project.yarn || [],
+      pattern: project.pattern || "",
+      needleSize: project.needle_size || "",
+      difficultyLevel: project.difficulty || "",
+      projectStatus: project.status || "not-started",
+      timeSpent: project.time_spent || 0,
+      tags: Array.isArray(project.tags)
+        ? project.tags.join(", ")
+        : (project.tags ?? ""),
+      taggedUsernames: initialTaggedUsernames || "",
+    },
+  });
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -113,7 +154,7 @@ export default function EditForm({ project }: { project: any }) {
     setImageUrls(newUrls);
   };
 
-  const onSubmit = async (values: z.infer<typeof editSchema>) => {
+  const onSubmit = async (values: EditFormValues) => {
     setIsSubmitting(true);
     try {
       const updatedData = {
@@ -125,39 +166,51 @@ export default function EditForm({ project }: { project: any }) {
         difficulty: values.difficultyLevel,
         status: values.projectStatus,
         time_spent: values.timeSpent,
-        tags: values.tags ? values.tags.split(",").map((tag) => tag.trim()) : [],
+        tags: values.tags ? values.tags.split(",").map((t) => t.trim()) : [],
       };
-  
-      console.log("Updating project with data:", updatedData);
+
       await updateProjectByID(project.project_id, updatedData);
+      await updateProjectTagsByUsernames(
+        project.project_id,
+        values.taggedUsernames ?? ""
+      );
+
       alert("Project updated successfully!");
       router.push(`/home/projects/${project.project_id}`);
-    } catch (error) {
-      console.error("Error updating project:", error);
+      router.refresh();
+    } catch (err) {
+      console.error("Error updating project:", err);
       alert("Failed to update project.");
     } finally {
       setIsSubmitting(false);
     }
   };
-  
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-
         {/* Project photos */}
         <div className="space-y-4">
           <h2 className="text-lg font-medium">Project Photos</h2>
           {imageUrls.length > 0 && (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
-              {imageUrls.map((url, index) => (
-                <div key={index} className="relative aspect-square rounded-md overflow-hidden border">
-                  <img src={url} alt={`Preview ${index + 1}`} className="w-full h-full object-cover" />
+              {imageUrls.map((url: string, index: number) => (
+                <div
+                  key={index}
+                  className="relative aspect-square rounded-md overflow-hidden border"
+                >
+                  <img
+                    src={url}
+                    alt={`Preview ${index + 1}`}
+                    className="w-full h-full object-cover"
+                  />
                   <Button
                     type="button"
                     variant="destructive"
                     size="icon"
                     className="absolute top-2 right-2 h-6 w-6 rounded-full"
-                    onClick={() => removeImage(index)}>
+                    onClick={() => removeImage(index)}
+                  >
                     <X className="h-3 w-3" />
                   </Button>
                 </div>
@@ -165,15 +218,29 @@ export default function EditForm({ project }: { project: any }) {
             </div>
           )}
           {imageUrls.length < 5 && (
-            <label htmlFor="image-upload" className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer bg-muted/30 hover:bg-muted/50 transition-colors">
+            <label
+              htmlFor="image-upload"
+              className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer bg-muted/30 hover:bg-muted/50 transition-colors"
+            >
               <div className="flex flex-col items-center justify-center pt-5 pb-6">
                 <Upload className="w-8 h-8 mb-2 text-muted-foreground" />
                 <p className="mb-2 text-sm text-muted-foreground">
-                  <span className="font-semibold">Click to upload</span> or drag and drop
+                  <span className="font-semibold">Click to upload</span> or
+                  drag and drop
                 </p>
-                <p className="text-xs text-muted-foreground">PNG, JPG or WEBP (MAX. 5MB each)</p>
+                <p className="text-xs text-muted-foreground">
+                  PNG, JPG or WEBP (MAX. 5MB each)
+                </p>
               </div>
-              <Input id="image-upload" type="file" accept="image/*" multiple className="hidden" onChange={handleImageUpload} disabled={imageUrls.length >= 5 || isSubmitting} />
+              <Input
+                id="image-upload"
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={handleImageUpload}
+                disabled={imageUrls.length >= 5 || isSubmitting}
+              />
             </label>
           )}
         </div>
@@ -204,7 +271,11 @@ export default function EditForm({ project }: { project: any }) {
                 <FormItem>
                   <FormLabel>Project Description</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Describe your project..." className="resize-y" {...field} />
+                    <Textarea
+                      placeholder="Describe your project..."
+                      className="resize-y"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -224,7 +295,11 @@ export default function EditForm({ project }: { project: any }) {
                         <Button
                           variant="outline"
                           role="combobox"
-                          className={cn("w-full justify-between", !field.value.length && "text-muted-foreground")}>
+                          className={cn(
+                            "w-full justify-between",
+                            !field.value.length && "text-muted-foreground"
+                          )}
+                        >
                           {field.value.length > 0
                             ? `${field.value.length} selected`
                             : "Select yarn types"}
@@ -243,12 +318,18 @@ export default function EditForm({ project }: { project: any }) {
                                 value={yarn.value}
                                 onSelect={() => {
                                   const values = field.value || [];
-                                  const newValues = values.includes(yarn.value)
+                                  const next = values.includes(yarn.value)
                                     ? values.filter((v) => v !== yarn.value)
                                     : [...values, yarn.value];
-                                  form.setValue("yarnTypes", newValues, { shouldValidate: true });
-                                }}>
-                                <Checkbox checked={field.value.includes(yarn.value)} className="mr-2" />
+                                  form.setValue("yarnTypes", next, {
+                                    shouldValidate: true,
+                                  });
+                                }}
+                              >
+                                <Checkbox
+                                  checked={field.value?.includes(yarn.value)}
+                                  className="mr-2"
+                                />
                                 {yarn.label}
                               </CommandItem>
                             ))}
@@ -269,8 +350,12 @@ export default function EditForm({ project }: { project: any }) {
                             size="icon"
                             className="h-4 w-4 p-0 hover:bg-transparent"
                             onClick={() => {
-                              const newValues = field.value.filter((v) => v !== value);
-                              form.setValue("yarnTypes", newValues, { shouldValidate: true });
+                              const next = field.value.filter(
+                                (v) => v !== value
+                              );
+                              form.setValue("yarnTypes", next, {
+                                shouldValidate: true,
+                              });
                             }}
                           >
                             <X className="h-3 w-3" />
@@ -391,10 +476,12 @@ export default function EditForm({ project }: { project: any }) {
                         max={100}
                         step={1}
                         value={[field.value || 0]}
-                        onValueChange={(value) => field.onChange(value[0])}
+                        onValueChange={(v) => field.onChange(v[0])}
                         className="flex-1"
                       />
-                      <span className="w-12 text-center">{field.value || 0}h</span>
+                      <span className="w-12 text-center">
+                        {field.value || 0}h
+                      </span>
                     </div>
                   </FormControl>
                   <FormMessage />
@@ -405,44 +492,45 @@ export default function EditForm({ project }: { project: any }) {
             {/* Tags */}
             <FormField
               control={form.control}
-              name="tags"
+              name="taggedUsernames"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Tags</FormLabel>
+                  <FormLabel>Tag users</FormLabel>
                   <FormControl>
-                    <Input placeholder="gift, toy, holiday" {...field} />
+                    <Input placeholder="Edit tags" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
           </CardContent>
         </Card>
 
-         {/* Buttons */}
-         <div className="flex justify-center space-x-4 mt-8">
-            <Button
-                type="submit"
-                className="bg-red-300 h-12 min-w-[180px] text-base rounded-md"
-                disabled={isSubmitting}>
-                {isSubmitting ? (
-                <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
-                </>
-                ) : (
-                "Edit Project"
-                )}
-            </Button>
-            <Button
-                type="button"
-                variant="outline"
-                onClick={() => router.push(`/home/projects/${project.project_id}`)}
-                disabled={isSubmitting}
-                className="h-12 min-w-[180px] text-base rounded-md hover:shadow-md transition-shadow duration-200">
-                Cancel
-            </Button>
+        {/* Buttons */}
+        <div className="flex justify-center space-x-4 mt-8">
+          <Button
+            type="submit"
+            className="bg-red-300 h-12 min-w-[180px] text-base rounded-md"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              "Edit Project"
+            )}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => router.push(`/home/projects/${project.project_id}`)}
+            disabled={isSubmitting}
+            className="h-12 min-w-[180px] text-base rounded-md hover:shadow-md transition-shadow duration-200"
+          >
+            Cancel
+          </Button>
         </div>
       </form>
     </Form>
