@@ -1,5 +1,10 @@
 import Link from "next/link";
-import { getCurrentUserProfile, getPostDataByID, isSaved } from "@/lib/db-actions";
+import {
+  getCurrentUserProfile,
+  getPostDataByID,
+  isSaved,
+  getTaggedUsersForProject,
+} from "@/lib/db-actions";
 import { PostCard } from "../../feed/components/post-card";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Bookmark, Ban, Pencil } from "lucide-react";
-
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 /**
  * Project details page.
  * Always checks DB to see if THIS user saved the project, and seeds PostCard with that.
@@ -17,17 +22,15 @@ import { MoreHorizontal, Bookmark, Ban, Pencil } from "lucide-react";
 export default async function ProjectDetailsPage({
   params,
 }: {
-  // In Next.js 15 these are Promises
   params: Promise<{ projectId: string }>;
 }) {
-  // await dynamic apis
   const { projectId } = await params;
 
-  const [project, profile, initialSaved] = await Promise.all([
+  const [project, profile, initialSaved, taggedUsers] = await Promise.all([
     getPostDataByID(projectId),
     getCurrentUserProfile(),
-    // 🔑 DB truth: is this project saved by the current user?
     isSaved(Number(projectId)),
+    getTaggedUsersForProject(Number(projectId)),
   ]);
 
   if (!project) {
@@ -93,16 +96,17 @@ export default async function ProjectDetailsPage({
               <strong>Project Status:</strong> {project.status}
             </li>
             <li>
-              <strong>Yarn Types:</strong> {project.yarn?.join(", ") || "Not specified"}
+              <strong>Yarn Types:</strong>{" "}
+              {project.yarn?.join(", ") || "Not specified"}
             </li>
             <li>
-              <strong>Pattern:</strong> {project.pattern}
+              <strong>Pattern:</strong> {project.pattern || "—"}
             </li>
             <li>
-              <strong>Needle Size:</strong> {project.needle_size}
+              <strong>Needle Size:</strong> {project.needle_size || "—"}
             </li>
             <li>
-              <strong>Difficulty Level:</strong> {project.difficulty}
+              <strong>Difficulty Level:</strong> {project.difficulty || "—"}
             </li>
             {project.time_spent !== null && (
               <li>
@@ -111,19 +115,36 @@ export default async function ProjectDetailsPage({
             )}
           </ul>
 
-          <hr className="my-4 border-gray-300" />
-
-          {project.tags && project.tags.length > 0 && (
-            <div>
-              <h2 className="text-lg font-semibold text-gray-800">Tags</h2>
-              <div className="flex flex-wrap mt-2 gap-2">
-                {project.tags.map((tag: string, i: number) => (
-                  <span key={i} className="px-3 py-1 bg-red-300 text-red-700 rounded-full text-sm">
-                    #{tag}
-                  </span>
+          {/* Tagged users */}
+          {taggedUsers && taggedUsers.length > 0 && (
+            <>
+              <hr className="my-4 border-gray-300" />
+              <h2 className="text-lg font-semibold text-gray-800">Tagged</h2>
+              <div className="mt-3 flex flex-wrap gap-3">
+                {taggedUsers.map((u) => (
+                  <Link
+                    key={u.id}
+                    href={`/home/profile/${u.id}`}
+                    className="flex items-center gap-2 rounded-full bg-white px-3 py-1 shadow hover:shadow-md transition"
+                  >
+                    <Avatar className="h-6 w-6">
+                      <AvatarImage src={u.avatar_url ?? ""} alt={u.username ?? ""} />
+                      <AvatarFallback>
+                        {(u.full_name || u.username || "?")
+                          .split(" ")
+                          .map((s) => s[0])
+                          .join("")
+                          .slice(0, 2)
+                          .toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="text-sm text-gray-800">
+                      @{u.username ?? u.full_name ?? "user"}
+                    </span>
+                  </Link>
                 ))}
               </div>
-            </div>
+            </>
           )}
         </div>
       </div>
