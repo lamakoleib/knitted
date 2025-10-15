@@ -718,8 +718,7 @@ export async function getComments(projectId: number) {
   }))
 }
 
-// --- Notifications (keep only one copy) ---
-export type NotificationType = "like" | "comment" | "follow"
+export type NotificationType = "like" | "comment" | "follow" | "tag";
 
 export type NotificationRow = {
   notification_id: number
@@ -1011,4 +1010,35 @@ export async function getTaggedUsersForProject(projectId: number | string) {
       full_name: string | null;
       avatar_url: string | null;
     }>;
+}
+
+export async function deleteProjectByID(projectId: number) 
+{
+  const supabase = await createClient();
+  const me = await getCurrentUser();
+  if (!me?.user?.id) throw new Error("Not authenticated");
+
+  const { data: project, error: fetchErr } = await supabase
+    .from("Project")
+    .select("user_id")
+    .eq("project_id", projectId)
+    .single();
+
+  if (fetchErr || !project) throw new Error("Project not found");
+  if (project.user_id !== me.user.id) throw new Error("Not authorized");
+
+  await supabase.from("Comments").delete().eq("project_id", projectId);
+  await supabase.from("Likes").delete().eq("project_id", projectId);
+  await supabase.from("project_tags").delete().eq("project_id", projectId);
+  await supabase.from("notifications").delete().eq("project_id", projectId);
+
+  const { error: delErr } = await supabase
+    .from("Project")
+    .delete()
+    .eq("project_id", projectId)
+    .eq("user_id", me.user.id);
+
+  if (delErr) throw delErr;
+
+  redirect(`/home/profile/${me.user.id}`);
 }
