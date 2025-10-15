@@ -1,9 +1,11 @@
 import Link from "next/link";
+import { revalidatePath } from "next/cache";
 import {
   getCurrentUserProfile,
   getPostDataByID,
   isSaved,
   getTaggedUsersForProject,
+  deleteProjectByID,
 } from "@/lib/db-actions";
 import { PostCard } from "../../feed/components/post-card";
 import { Button } from "@/components/ui/button";
@@ -69,14 +71,25 @@ export default async function ProjectDetailsPage({
                       </div>
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href={`/home/projects/${project.project_id}/delete`}>
-                      <div className="flex items-center text-red-600">
+
+                  {/* delete post */}
+                  <form
+                    action={async () => {
+                      "use server";
+                      revalidatePath(`/home/profile/${profile.id}`);
+                      await deleteProjectByID(Number(project.project_id));
+                    }}
+                  >
+                    <DropdownMenuItem asChild>
+                      <button
+                        type="submit"
+                        className="flex w-full items-center text-red-600"
+                      >
                         <Ban className="mr-2 h-4 w-4" />
                         Delete Post
-                      </div>
-                    </Link>
-                  </DropdownMenuItem>
+                      </button>
+                    </DropdownMenuItem>
+                  </form>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
