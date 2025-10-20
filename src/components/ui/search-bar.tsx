@@ -33,13 +33,13 @@ export default function SearchBar({ searchTerm, setSearchTerm, handleSearch }: {
   
   
   return (
-    <div className="flex items-center gap-2 w-full max-w-lg mx-auto bg-red-300/60 p-3 rounded-full shadow">
+    <div className="flex items-center gap-2 w-full max-w-lg mx-auto bg-white p-3 rounded-full shadow">
       <Input
         type="text"
         placeholder="Search..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
-        className="flex-1 border-none outline-none focus:ring-0 bg-transparent text-black"
+        className="flex-1 border-none focus:border-0 focus-visible:ring-0 focus-visible:ring-offset-0  outline-none focus:ring-0 bg-transparent shadow:none text-black"
       />
       <Button 
         variant="outline" 
