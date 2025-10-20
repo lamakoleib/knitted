@@ -13,9 +13,13 @@ import { useEffect } from "react";
  * @param setSearchTerm - Setter function for updating the search term.
  * @param handleSearch - Function to execute the search logic.
  */
-export default function SearchBar({ searchTerm, setSearchTerm, handleSearch }: { 
-  searchTerm: string; 
-  setSearchTerm: (term: string) => void; 
+export default function SearchBar({
+  searchTerm,
+  setSearchTerm,
+  handleSearch,
+}: {
+  searchTerm: string;
+  setSearchTerm: (term: string) => void;
   handleSearch: () => void;
 }) {
   useEffect(() => {
@@ -23,31 +27,28 @@ export default function SearchBar({ searchTerm, setSearchTerm, handleSearch }: {
       handleSearch();
       return;
     }
-  
-    const delayDebounceFn = setTimeout(() => {
-      handleSearch();
-    }, 500);
-  
-    return () => clearTimeout(delayDebounceFn);
-  }, [searchTerm]);
-  
-  
+
+    const t = setTimeout(() => handleSearch(), 500);
+    return () => clearTimeout(t);
+  }, [searchTerm, handleSearch]);
+
   return (
-    <div className="flex items-center gap-2 w-full max-w-lg mx-auto bg-white p-3 rounded-full shadow">
+    <div className="flex items-center gap-2 w-full max-w-lg mx-auto bg-white p-3 rounded-full shadow ring-1 ring-red-300 focus-within:ring-2">
       <Input
         type="text"
         placeholder="Search..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
-        className="flex-1 border-none focus:border-0 focus-visible:ring-0 focus-visible:ring-offset-0  outline-none focus:ring-0 bg-transparent shadow:none text-black"
+        className="flex-1 bg-transparent border-none outline-none focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-gray-400 text-black"
       />
-      <Button 
-        variant="outline" 
-        size="icon" 
-        className="bg-white/50 hover:bg-white/70" 
+      <Button
+        variant="outline"
+        size="icon"
+        className="border-red-300 text-red-400 hover:bg-red-50"
         onClick={handleSearch}
+        aria-label="Search"
       >
-        <Search className="w-5 h-5 text-gray-700" />
+        <Search className="w-5 h-5" />
       </Button>
     </div>
   );
