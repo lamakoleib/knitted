@@ -1042,3 +1042,39 @@ export async function deleteProjectByID(projectId: number)
 
   redirect(`/home/profile/${me.user.id}`);
 }
+
+export async function deleteComment(commentId: number) 
+{
+  const supabase = await createClient();
+  const me = await getCurrentUser();
+  const { data: comment, error: fetchErr } = await supabase
+    .from("Comments")
+    .select("user_id, project_id")
+    .eq("comment_id", commentId)
+    .single();
+
+  if (fetchErr) throw fetchErr;
+  if (!comment) throw new Error("Comment not found");
+
+  const { data: project, error: projectErr } = await supabase
+    .from("Project")
+    .select("user_id")
+    .eq("project_id", comment.project_id)
+    .single();
+
+  if (projectErr) throw projectErr;
+
+  const isCommentAuthor = comment.user_id === me.user.id;
+  const isPostOwner = project?.user_id === me.user.id;
+
+  if (!isCommentAuthor && !isPostOwner) 
+  {
+    throw new Error("Not allowed to delete this comment");
+  }
+  const { error: delErr } = await supabase
+    .from("Comments")
+    .delete()
+    .eq("comment_id", commentId);
+
+  if (delErr) throw delErr;
+}

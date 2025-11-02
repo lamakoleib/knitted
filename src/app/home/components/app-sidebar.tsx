@@ -70,11 +70,11 @@ const data = {
       url: "/home/patterns",
       icon: Frame,
     },
-    {
+    /*{
       name: "Messages",
       url: "#",
       icon: MessageCircle,
-    },    
+    },*/    
     { 
       name: "Notifications", 
       url: "/home/notifications", 
