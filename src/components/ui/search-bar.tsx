@@ -1,9 +1,9 @@
-"use client";
+"use client"
 
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
-import { useEffect } from "react";
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Search } from "lucide-react"
+import { useEffect } from "react"
 
 /**
  * SearchBar component with input and button.
@@ -18,19 +18,19 @@ export default function SearchBar({
   setSearchTerm,
   handleSearch,
 }: {
-  searchTerm: string;
-  setSearchTerm: (term: string) => void;
-  handleSearch: () => void;
+  searchTerm: string
+  setSearchTerm: (term: string) => void
+  handleSearch: () => void
 }) {
   useEffect(() => {
     if (!searchTerm.trim()) {
-      handleSearch();
-      return;
+      handleSearch()
+      return
     }
 
-    const t = setTimeout(() => handleSearch(), 500);
-    return () => clearTimeout(t);
-  }, [searchTerm, handleSearch]);
+    const t = setTimeout(() => handleSearch(), 500)
+    return () => clearTimeout(t)
+  }, [searchTerm, handleSearch])
 
   return (
     <div className="flex items-center gap-2 w-full max-w-lg mx-auto bg-white p-3 rounded-full shadow ring-1 ring-red-300 focus-within:ring-2">
@@ -51,5 +51,5 @@ export default function SearchBar({
         <Search className="w-5 h-5" />
       </Button>
     </div>
-  );
+  )
 }
