@@ -10,7 +10,7 @@ import type { FeedPost } from "@/types/feed";
 import { Input } from "@/components/ui/input";
 import { Heart, MessageCircle, Plus } from "lucide-react";
 import { formatPostTime } from "@/utils/format-date";
-import { isLiked, likePost, unlikePost, addComment, getComments } from "@/lib/db-actions";
+import { isLiked, likePost, unlikePost, addComment, getComments, deleteComment } from "@/lib/db-actions";
 import { Tables } from "@/types/database.types";
 import PostSaveAction from "@/components/posts/PostSaveAction";
 
@@ -26,14 +26,14 @@ type Comment = {
 export function PostCard({
   post,
   profile,
-  initialSaved = false, // ✅ new prop from server
+  initialSaved = false,
 }: {
   post: FeedPost;
   profile: Tables<"Profiles">;
   initialSaved?: boolean;
 }) {
   const [liked, setLiked] = useState(false);
-  const [saved, setSaved] = useState(initialSaved); // ✅ seed from server
+  const [saved, setSaved] = useState(initialSaved);
   const [likeCount, setLikeCount] = useState(post.like_count);
   const [comments, setComments] = useState<Comment[]>([]);
   const [isLoadingComments, setIsLoadingComments] = useState(false);
@@ -88,6 +88,14 @@ export function PostCard({
       console.error("Error adding comment:", error);
     }
   };
+  const handleDeleteComment = async (commentId: number) => {
+    try {
+      await deleteComment(commentId);
+      setComments((prev) => prev.filter((c) => c.id !== commentId));
+    } catch (error) {
+      console.error("Error deleting comment:", error);
+    }
+  };
 
   const displayedComments = showAllComments ? comments : comments.slice(0, 2);
   const { display: displayTime } = formatPostTime(post.created_at);
@@ -133,8 +141,8 @@ export function PostCard({
               <Heart size={20} className={liked ? "fill-red-500 text-red-500" : ""} />
             </button>
             <PostSaveAction
-              projectId={post.project_id} // ✅ use project ID (BIGINT)
-              initialSaved={saved}         // ✅ from server
+              projectId={post.project_id} // use project ID (BIGINT)
+              initialSaved={saved} // from server
               profileIdForRoute={profile?.id ?? ""}
             />
           </span>
@@ -166,14 +174,24 @@ export function PostCard({
                 </button>
               )}
               {displayedComments.map((comment) => (
-                <p key={comment.id} className="text-sm">
-                  <span className="font-medium">
-                    <Link href={`/home/profile/${comment.user_id}`}>
-                      {comment.username}
-                    </Link>
-                  </span>{" "}
-                  <span>{comment.comment}</span>
-                </p>
+                <div key={comment.id} className="flex items-center gap-2 text-sm">
+                  <p className="flex-1">
+                    <span className="font-medium">
+                      <Link href={`/home/profile/${comment.user_id}`}>
+                        {comment.username}
+                      </Link>
+                    </span>{" "}
+                    <span>{comment.comment}</span>
+                  </p>
+                  {(comment.user_id === profile.id || creatorId === profile.id) && (
+                    <button
+                      onClick={() => handleDeleteComment(comment.id)}
+                      className="text-xs text-red-500 hover:underline"
+                    >
+                      delete
+                    </button>
+                  )}
+                </div>
               ))}
               {showAllComments && comments.length > 2 && (
                 <button

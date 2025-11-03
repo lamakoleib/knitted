@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import SearchBar from "@/components/ui/search-bar";
@@ -22,21 +22,39 @@ export default function SearchPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [profiles, setProfiles] = useState<Partial<Tables<"Profiles">>[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  //Clears the profile list when the search term's empty
-  useEffect(() => {
-    if (!searchTerm.trim()) {
+  const handleSearch = useCallback(async () => {
+    const term = searchTerm.trim();
+    if (!term) {
       setProfiles([]);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const results = await searchProfiles(term);
+      setProfiles(results ?? []);
+    } catch (err) {
+      console.error(err);
+      setError("Something went wrong.");
+      setProfiles([]);
+    } finally {
+      setLoading(false);
     }
   }, [searchTerm]);
 
-  const handleSearch = async () => {
-    if (!searchTerm.trim()) return;
-    setLoading(true);
-    const results = await searchProfiles(searchTerm.trim());
-    setProfiles(results);
-    setLoading(false);
-  };
+  useEffect(() => {
+    if (!searchTerm.trim()) 
+    {
+      setProfiles([]);
+      setLoading(false);
+      setError(null);
+    }
+  }, [searchTerm]);
 
   return (
     <div className="container max-w-4xl mx-auto px-4 py-8 bg-muted">
@@ -57,6 +75,7 @@ export default function SearchPage() {
 
       <div className="mt-6">
         {loading && <p className="text-gray-500">Loading...</p>}
+        {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
 
         {/* Displays search results if profiles exist */}
         {!loading && profiles.length > 0 ? (
