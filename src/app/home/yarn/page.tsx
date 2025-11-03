@@ -1,15 +1,15 @@
-"use client";
+"use client"
 
-import { useEffect, useMemo, useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import SearchBar from "@/components/ui/search-bar";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react"
+import Image from "next/image"
+import Link from "next/link"
+import SearchBar from "@/components/ui/search-bar"
+import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Badge } from "@/components/ui/badge"
+import { Separator } from "@/components/ui/separator"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 /* ----------------------------- Types & Options ---------------------------- */
 
@@ -23,19 +23,19 @@ type YarnWeight =
   | "Aran"
   | "Bulky"
   | "Super Bulky"
-  | "Jumbo";
+  | "Jumbo"
 
 type Yarn = {
-  id: string;
-  name: string;
-  brand: string;
-  image: string;
-  weight: YarnWeight;
-  fibers: string[];
-  colors: string[];
-  styles: string[];
-  price?: string;
-};
+  id: string
+  name: string
+  brand: string
+  image: string
+  weight: string
+  fibers: string[]
+  colors: string[]
+  styles: string[]
+  price?: string
+}
 
 const FIBERS = [
   "Acrylic",
@@ -54,7 +54,7 @@ const FIBERS = [
   "Rayon",
   "Silk",
   "Wool",
-] as const;
+] as const
 
 const WEIGHTS: YarnWeight[] = [
   "Lace",
@@ -67,7 +67,7 @@ const WEIGHTS: YarnWeight[] = [
   "Bulky",
   "Super Bulky",
   "Jumbo",
-];
+]
 
 const PATTERN_STYLES = [
   "Solid",
@@ -82,7 +82,7 @@ const PATTERN_STYLES = [
   "Marled",
   "Bouclé",
   "Chainette",
-] as const;
+] as const
 
 const COLOR_SWATCHES = [
   { label: "White", hex: "#FFFFFF" },
@@ -121,7 +121,7 @@ const COLOR_SWATCHES = [
   { label: "Sky", hex: "#87CEEB" },
   { label: "Royal", hex: "#4169E1" },
   { label: "Navy", hex: "#001F54" },
-] as const;
+] as const
 
 /* ----------------------------- Dev fallback data ----------------------------- */
 
@@ -192,7 +192,7 @@ const MOCK_YARNS: Yarn[] = [
     styles: ["Solid"],
     price: "$8.25",
   },
-];
+]
 
 /* --------------------------------- UI bits --------------------------------- */
 
@@ -202,14 +202,15 @@ function Dot({ hex }: { hex: string }) {
       className="inline-block size-3 rounded-full border"
       style={{ backgroundColor: hex }}
     />
-  );
+  )
 }
 
 function Card({ yarn }: { yarn: Yarn }) {
-  const swatches = yarn.colors
+  const colors = yarn.colors ?? []
+  const swatches = colors
     .map((label) => COLOR_SWATCHES.find((c) => c.label === label)?.hex)
     .filter(Boolean)
-    .slice(0, 3) as string[];
+    .slice(0, 3) as string[]
 
   return (
     <div className="group rounded-xl border bg-card p-3 transition hover:shadow-sm">
@@ -266,7 +267,7 @@ function Card({ yarn }: { yarn: Yarn }) {
         </Link>
       </div>
     </div>
-  );
+  )
 }
 
 /* ------------------------------ Filter Panel ------------------------------ */
@@ -282,25 +283,25 @@ function FilterPanel({
   setSelectedStyles,
   onClear,
 }: {
-  selectedFibers: Set<string>;
-  setSelectedFibers: (next: Set<string>) => void;
-  selectedColors: Set<string>;
-  setSelectedColors: (next: Set<string>) => void;
-  selectedWeights: Set<string>;
-  setSelectedWeights: (next: Set<string>) => void;
-  selectedStyles: Set<string>;
-  setSelectedStyles: (next: Set<string>) => void;
-  onClear: () => void;
+  selectedFibers: Set<string>
+  setSelectedFibers: (next: Set<string>) => void
+  selectedColors: Set<string>
+  setSelectedColors: (next: Set<string>) => void
+  selectedWeights: Set<string>
+  setSelectedWeights: (next: Set<string>) => void
+  selectedStyles: Set<string>
+  setSelectedStyles: (next: Set<string>) => void
+  onClear: () => void
 }) {
   const toggle = (
     set: Set<string>,
     value: string,
     setter: (n: Set<string>) => void
   ) => {
-    const next = new Set(set);
-    next.has(value) ? next.delete(value) : next.add(value);
-    setter(next);
-  };
+    const next = new Set(set)
+    next.has(value) ? next.delete(value) : next.add(value)
+    setter(next)
+  }
 
   return (
     <div className="flex h-full flex-col">
@@ -395,56 +396,42 @@ function FilterPanel({
         </div>
       </ScrollArea>
     </div>
-  );
+  )
 }
 
 /* ---------------------------------- Page ---------------------------------- */
 
 export default function YarnPage() {
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState("")
 
   // filters
-  const [selectedFibers, setSelectedFibers] = useState<Set<string>>(new Set());
-  const [selectedColors, setSelectedColors] = useState<Set<string>>(new Set());
-  const [selectedWeights, setSelectedWeights] = useState<Set<string>>(new Set());
-  const [selectedStyles, setSelectedStyles] = useState<Set<string>>(new Set());
+  const [selectedFibers, setSelectedFibers] = useState<Set<string>>(new Set())
+  const [selectedColors, setSelectedColors] = useState<Set<string>>(new Set())
+  const [selectedWeights, setSelectedWeights] = useState<Set<string>>(
+    new Set()
+  )
+  const [selectedStyles, setSelectedStyles] = useState<Set<string>>(new Set())
 
   // results + ui state
-  const [results, setResults] = useState<Yarn[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [results, setResults] = useState<Yarn[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [mobileOpen, setMobileOpen] = useState(false)
 
-  // Ravelry → Yarn mapper
-  function mapRavelryToYarn(y: any): Yarn {
-    return {
-      id: String(y.id),
-      name: y.name ?? "Unknown",
-      brand: y.yarn_company_name ?? "—",
-      image:
-        y.first_photo?.medium_url ??
-        y.first_photo?.small_url ??
-        "/placeholder.svg",
-      weight: (y.yarn_weight?.name as YarnWeight) ?? "Worsted",
-      fibers: (y.yarn_fibers ?? [])
-        .map((f: any) => (f?.fiber_type_name ?? "").split(" ")[0])
-        .filter(Boolean),
-      colors: [],
-      styles: [],
-      price: undefined,
-    };
-  }
+  const abortRef = useRef<AbortController | null>(null)
 
-  // API call
-  const handleSearch = async () => {
+  const handleSearch = useCallback(async () => {
+    abortRef.current?.abort()
+    abortRef.current = new AbortController()
+    const { signal } = abortRef.current
+
     try {
-      setLoading(true);
-      setError(null);
+      setLoading(true)
+      setError(null)
 
-      const params = new URLSearchParams();
-      if (searchTerm.trim()) params.set("q", searchTerm.trim());
+      const params = new URLSearchParams()
+      if (searchTerm.trim()) params.set("q", searchTerm.trim())
 
-      // single weight → send to API
       const weightMap: Record<string, string> = {
         Lace: "lace",
         "Light Fingering": "light_fingering",
@@ -456,67 +443,78 @@ export default function YarnPage() {
         Bulky: "bulky",
         "Super Bulky": "super_bulky",
         Jumbo: "jumbo",
-      };
+      }
       if (selectedWeights.size === 1) {
-        const w = Array.from(selectedWeights)[0];
-        if (weightMap[w]) params.set("weight", weightMap[w]);
+        const w = Array.from(selectedWeights)[0]
+        if (weightMap[w]) params.set("weight", weightMap[w])
       }
 
-      // single fiber → send to API as fiberc
       if (selectedFibers.size === 1) {
-        const f = Array.from(selectedFibers)[0].toLowerCase();
-        params.set("fiberc", f);
+        const f = Array.from(selectedFibers)[0].toLowerCase()
+        params.set("fiberc", f)
       }
 
-      params.set("page_size", "24");
+      params.set("page_size", "24")
 
-      const res = await fetch(`/api/yarns?${params.toString()}`);
-      if (!res.ok) throw new Error(`Search failed (${res.status})`);
-      const data = await res.json();
+      const res = await fetch(`/api/yarns?${params.toString()}`)
 
-      const mapped: Yarn[] = (data?.results ?? []).map(mapRavelryToYarn);
-      setResults(mapped);
+      if (!res.ok) throw new Error(`Search failed (${res.status})`)
+
+      const data = await res.json()
+
+      const list: Yarn[] = Array.isArray(data?.results) ? data.results : []
+      if (!signal.aborted) {
+        setResults(list)
+      }
     } catch (e: any) {
-      setError(e.message ?? "Search failed");
+      if (e?.name !== "AbortError") {
+        console.error(e)
+        setError(e?.message ?? "Search failed")
+      }
     } finally {
-      setLoading(false);
+      if (!signal.aborted) {
+        setLoading(false)
+      }
     }
-  };
+  }, [searchTerm, selectedWeights, selectedFibers])
 
-  // initial fetch
   useEffect(() => {
-    handleSearch();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    handleSearch()
+    return () => abortRef.current?.abort()
+  }, [handleSearch])
 
-  // local filtering 
+  // local filtering
   const filtered = useMemo(() => {
-    const base = results.length ? results : MOCK_YARNS; // fallback while devving
-    const q = searchTerm.trim().toLowerCase();
+    const base = results.length ? results : MOCK_YARNS
+    const q = searchTerm.trim().toLowerCase()
     return base.filter((y) => {
       const matchesQ =
         !q ||
         y.name.toLowerCase().includes(q) ||
         y.brand.toLowerCase().includes(q) ||
         y.fibers.some((f) => f.toLowerCase().includes(q)) ||
-        y.styles.some((s) => s.toLowerCase().includes(q));
+        y.styles.some((s) => s.toLowerCase().includes(q))
 
       const matchesFiber =
         selectedFibers.size === 0 ||
-        y.fibers.some((f) => selectedFibers.has(f));
+        y.fibers.some((f) => selectedFibers.has(f))
       const matchesColor =
         selectedColors.size === 0 ||
-        y.colors.some((c) => selectedColors.has(c));
+        y.colors.some((c) => selectedColors.has(c))
       const matchesWeight =
-        selectedWeights.size === 0 || selectedWeights.has(y.weight);
+        selectedWeights.size === 0 || selectedWeights.has(y.weight)
       const matchesStyle =
         selectedStyles.size === 0 ||
-        y.styles.some((s) => selectedStyles.has(s));
+        y.styles.some((s) => selectedStyles.has(s))
 
       return (
-        matchesQ && matchesFiber && matchesColor && matchesWeight && matchesStyle
-      );
-    });
+        matchesQ &&
+        matchesFiber &&
+        matchesColor &&
+        matchesWeight &&
+        matchesStyle
+      )
+    })
   }, [
     results,
     searchTerm,
@@ -524,14 +522,14 @@ export default function YarnPage() {
     selectedColors,
     selectedWeights,
     selectedStyles,
-  ]);
+  ])
 
   const clearAll = () => {
-    setSelectedFibers(new Set());
-    setSelectedColors(new Set());
-    setSelectedWeights(new Set());
-    setSelectedStyles(new Set());
-  };
+    setSelectedFibers(new Set())
+    setSelectedColors(new Set())
+    setSelectedWeights(new Set())
+    setSelectedStyles(new Set())
+  }
 
   return (
     <div className="p-6">
@@ -643,5 +641,5 @@ export default function YarnPage() {
         </aside>
       </div>
     </div>
-  );
+  )
 }
