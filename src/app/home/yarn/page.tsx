@@ -206,7 +206,8 @@ function Dot({ hex }: { hex: string }) {
 }
 
 function Card({ yarn }: { yarn: Yarn }) {
-  const swatches = yarn.colors
+  const colors = yarn.colors ?? []
+  const swatches = colors
     .map((label) => COLOR_SWATCHES.find((c) => c.label === label)?.hex)
     .filter(Boolean)
     .slice(0, 3) as string[]
@@ -455,10 +456,8 @@ export default function YarnPage() {
 
       params.set("page_size", "24")
 
-      const res = await fetch(`/api/yarns?${params.toString()}`, {
-        cache: "no-store",
-        signal,
-      })
+      const res = await fetch(`/api/yarns?${params.toString()}`)
+
       if (!res.ok) throw new Error(`Search failed (${res.status})`)
 
       const data = await res.json()
