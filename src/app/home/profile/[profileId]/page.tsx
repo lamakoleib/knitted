@@ -26,13 +26,14 @@ import {
 import { getCurrentUser } from "@/lib/auth-actions"
 import Follow from "../components/follow-button"
 import Unfollow from "../components/unfollow-button"
+
 /**
  * Renders a user profile page.
  *
  * Displays user information, profile image, stats, action buttons (follow, message),
  * and a tabbed interface for viewing the user's projects or tagged content.
  *
- * @param params - Route parameters containing the `profileId` to load.
+ * @param params - Route parameters containing the profileId to load.
  * @returns The profile page component.
  */
 export default async function Profile({
@@ -40,7 +41,7 @@ export default async function Profile({
 }: {
   params: Promise<{ profileId: string }>
 }) {
-  //Fetches user profile data
+  // Fetch user profile data
   const { profileId } = await params
   const profile = await getProfileByID(profileId)
   const currentUser = await getCurrentUser()
@@ -57,17 +58,22 @@ export default async function Profile({
           <Avatar className="h-24 w-24 md:h-36 md:w-36 border-2 border-background">
             <AvatarImage src={profile.avatar_url ?? ""} alt={profile.username ?? ""} />
             <AvatarFallback>
-              {profile.full_name?.split(" ").map((n: string) => n.charAt(0)).join("")}
+              {profile.full_name
+                ?.split(" ")
+                .map((n: string) => n.charAt(0))
+                .join("")}
             </AvatarFallback>
           </Avatar>
         </div>
+
         {/* User info section */}
         <div className="flex-1 space-y-4">
           <div className="flex flex-col md:flex-row md:items-center gap-4">
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-semibold">{profile.username}</h1>
             </div>
-            {/* Profile action btns */}
+
+            {/* Profile action buttons */}
             <div className="flex gap-2 mt-2 md:mt-0 md:ml-auto">
               {isOwner ? (
                 <Link href="/settings">
@@ -80,18 +86,27 @@ export default async function Profile({
               ) : (
                 <Follow profileId={profileId} />
               )}
+
               <Button variant="outline">Message</Button>
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="icon" className="h-10 w-10">
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
+
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem>
-                    <Bookmark className="mr-2 h-4 w-4" />
-                    <span>Archived</span>
-                  </DropdownMenuItem>
+                  {/* Only owner sees Archived */}
+                  {isOwner && (
+                    <DropdownMenuItem asChild>
+                      <Link href={`/home/profile/${profileId}/archived`}>
+                        <Bookmark className="mr-2 h-4 w-4" />
+                        <span>Archived</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+
                   <DropdownMenuItem asChild>
                     <Link href={`/home/profile/${profileId}/saved`}>
                       <Bookmark className="mr-2 h-4 w-4" />
@@ -102,6 +117,7 @@ export default async function Profile({
               </DropdownMenu>
             </div>
           </div>
+
           {/* Stats */}
           <div className="flex gap-6">
             <div className="text-center md:text-left">
@@ -117,6 +133,7 @@ export default async function Profile({
               <span className="text-muted-foreground ml-1">following</span>
             </div>
           </div>
+
           {/* Bio */}
           <div className="space-y-1">
             <h2 className="font-semibold">{profile.full_name}</h2>
@@ -144,19 +161,17 @@ export default async function Profile({
             {projects.map((project, i) => (
               <Link key={i} href={`/home/projects/${project.project_id}`} passHref>
                 <div className="aspect-square relative group cursor-pointer">
-                     <Image
-                      src={project.images[0]}
-                      alt={project.title}
-                      fill
-                      className="object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4 text-white">
+                  <Image
+                    src={project.images[0]}
+                    alt={project.title}
+                    fill
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4 text-white">
                     <div className="flex items-center gap-1">
                       <MessageCircle className="h-5 w-5 fill-white" />
-                        <span className="font-semibold">
-                          {project.comment_count}
-                        </span>
-                      </div>
+                      <span className="font-semibold">{project.comment_count}</span>
+                    </div>
                   </div>
                 </div>
               </Link>
@@ -172,6 +187,7 @@ export default async function Profile({
                 No tagged posts yet.
               </div>
             )}
+
             {taggedProjects.map((project, i) => (
               <Link key={i} href={`/home/projects/${project.project_id}`} passHref>
                 <div className="aspect-square relative group cursor-pointer">
@@ -184,7 +200,9 @@ export default async function Profile({
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4 text-white">
                     <div className="flex items-center gap-1">
                       <MessageCircle className="h-5 w-5 fill-white" />
-                      <span className="font-semibold">{project.comment_count ?? 0}</span>
+                      <span className="font-semibold">
+                        {project.comment_count ?? 0}
+                      </span>
                     </div>
                   </div>
                 </div>
