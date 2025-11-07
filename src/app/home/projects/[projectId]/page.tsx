@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { MoreHorizontal, Bookmark, BookmarkX, Ban, Pencil } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { notFound } from "next/navigation" // optional if you block viewing archived by non-owners
+import { notFound } from "next/navigation" 
 
 export default async function ProjectDetailsPage({
   params,
@@ -42,8 +42,6 @@ export default async function ProjectDetailsPage({
   const projectWithArchive = project as typeof project & { archived_at: string | null }
   const isOwner = project.user_id === profile.id
 
-  // (optional) hide archived detail from non-owners
-  // if (project.archived_at && !isOwner) notFound();
 
   return (
     <div className="bg-muted p-4 md:p-12 min-h-screen w-full">

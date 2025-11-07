@@ -1131,7 +1131,7 @@ export async function getArchivedProjectsByUser(
       Profiles!Project_user_id_fkey ( username, avatar_url )
     `)
     .eq("user_id", userId)
-    .not("archived_at", "is", null)        // 👈 only archived
+    .not("archived_at", "is", null)      
     .order("archived_at", { ascending: false })
     .range(from, to);
 
