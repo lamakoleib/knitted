@@ -273,7 +273,8 @@ export async function getProjectsByUserID(userId: string) {
   const { data: projects, error: projectsError } = await supabase
       .from("Project")
       .select("project_id, title, images")
-      .eq("user_id", userId);
+      .eq("user_id", userId)
+      .is("archived_at", null);
   if (projectsError) {
       console.error("Error fetching projects:", projectsError);
       return [];
@@ -878,6 +879,7 @@ export async function getMySavedProjects(): Promise<Tables<"Project">[]> {
     .from("Project")
     .select("*")
     .in("project_id", ids)
+    .is("archived_at", null)
     .order("created_at", { ascending: false });
 
   if (error) throw error;
@@ -1077,4 +1079,62 @@ export async function deleteComment(commentId: number)
     .eq("comment_id", commentId);
 
   if (delErr) throw delErr;
+}
+export async function archiveProject(projectId: number) {
+  const supabase = await createClient();
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth?.user) throw new Error("Not authenticated");
+
+  const { error } = await supabase
+    .from("Project")
+    .update({ archived_at: new Date().toISOString() })
+    .eq("project_id", projectId)
+    .eq("user_id", auth.user.id);
+
+  if (error) throw error;
+
+  revalidatePath("/home");
+  revalidatePath(`/home/profile/${auth.user.id}`);
+  revalidatePath(`/home/profile/${auth.user.id}/archived`);
+}
+
+export async function unarchiveProject(projectId: number) {
+  const supabase = await createClient();
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth?.user) throw new Error("Not authenticated");
+
+  const { error } = await supabase
+    .from("Project")
+    .update({ archived_at: null })
+    .eq("project_id", projectId)
+    .eq("user_id", auth.user.id);
+
+  if (error) throw error;
+
+  revalidatePath("/home");
+  revalidatePath(`/home/profile/${auth.user.id}`);
+  revalidatePath(`/home/profile/${auth.user.id}/archived`);
+}
+
+export async function getArchivedProjectsByUser(
+  userId: string,
+  { limit = 24, page = 0 }: { limit?: number; page?: number } = {}
+) {
+  const supabase = await createClient();
+  const from = page * limit;
+  const to = from + limit - 1;
+
+  const { data, error } = await supabase
+    .from("Project")
+    .select(`
+      project_id, user_id, title, images, created_at, archived_at,
+      Profiles!Project_user_id_fkey ( username, avatar_url )
+    `)
+    .eq("user_id", userId)
+    .not("archived_at", "is", null)        // 👈 only archived
+    .order("archived_at", { ascending: false })
+    .range(from, to);
+
+  if (error) throw error;
+  return data ?? [];
 }
