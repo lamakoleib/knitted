@@ -1,51 +1,52 @@
-import Link from "next/link";
-import { revalidatePath } from "next/cache";
+import Link from "next/link"
+import { revalidatePath } from "next/cache"
 import {
   getCurrentUserProfile,
   getPostDataByID,
   isSaved,
   getTaggedUsersForProject,
   deleteProjectByID,
-} from "@/lib/db-actions";
-import { PostCard } from "../../feed/components/post-card";
-import { Button } from "@/components/ui/button";
+  archiveProject,
+  unarchiveProject,
+} from "@/lib/db-actions"
+import { PostCard } from "../../feed/components/post-card"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Bookmark, Ban, Pencil } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-/**
- * Project details page.
- * Always checks DB to see if THIS user saved the project, and seeds PostCard with that.
- */
+} from "@/components/ui/dropdown-menu"
+import { MoreHorizontal, Bookmark, BookmarkX, Ban, Pencil } from "lucide-react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { notFound } from "next/navigation" 
+
 export default async function ProjectDetailsPage({
   params,
 }: {
-  params: Promise<{ projectId: string }>;
+  params: Promise<{ projectId: string }>
 }) {
-  const { projectId } = await params;
+  const { projectId } = await params
 
   const [project, profile, initialSaved, taggedUsers] = await Promise.all([
     getPostDataByID(projectId),
     getCurrentUserProfile(),
     isSaved(Number(projectId)),
     getTaggedUsersForProject(Number(projectId)),
-  ]);
+  ])
 
   if (!project) {
-    return <div className="p-6">Project not found.</div>;
+    return <div className="p-6">Project not found.</div>
   }
 
-  const isOwner = project.user_id === profile.id;
+  const projectWithArchive = project as typeof project & { archived_at: string | null }
+  const isOwner = project.user_id === profile.id
+
 
   return (
     <div className="bg-muted p-4 md:p-12 min-h-screen w-full">
       <div className="max-w-[1000px] mx-auto grid grid-cols-1 md:grid-cols-[1.5fr_2fr] gap-6 md:gap-10">
         <div className="relative">
-          {/* Seed bookmark with DB-verified saved state */}
           <PostCard post={project} profile={profile} initialSaved={initialSaved} />
 
           {isOwner && (
@@ -56,28 +57,55 @@ export default async function ProjectDetailsPage({
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
+
                 <DropdownMenuContent align="end">
+                  {/* EDIT */}
                   <DropdownMenuItem asChild>
                     <Link href={`/home/projects/${project.project_id}/edit`}>
                       <Pencil className="mr-2 h-4 w-4" />
                       <span>Edit Post</span>
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href={`/home/projects/${project.project_id}/archive`}>
-                      <div className="flex items-center">
-                        <Bookmark className="mr-2 h-4 w-4" />
-                        Archive Post
-                      </div>
-                    </Link>
-                  </DropdownMenuItem>
 
-                  {/* delete post */}
+                  {/* ARCHIVE / UNARCHIVE */}
+                  {!projectWithArchive.archived_at ? (
+                    <form
+                      action={async () => {
+                        "use server"
+                        await archiveProject(Number(project.project_id))
+                        revalidatePath(`/home/projects/${project.project_id}`)
+                      }}
+                    >
+                      <DropdownMenuItem asChild>
+                        <button type="submit" className="flex w-full items-center">
+                          <Bookmark className="mr-2 h-4 w-4" />
+                          Archive Post
+                        </button>
+                      </DropdownMenuItem>
+                    </form>
+                  ) : (
+                    <form
+                      action={async () => {
+                        "use server"
+                        await unarchiveProject(Number(project.project_id))
+                        revalidatePath(`/home/projects/${project.project_id}`)
+                      }}
+                    >
+                      <DropdownMenuItem asChild>
+                        <button type="submit" className="flex w-full items-center">
+                          <BookmarkX className="mr-2 h-4 w-4" />
+                          Unarchive Post
+                        </button>
+                      </DropdownMenuItem>
+                    </form>
+                  )}
+
+                  {/* DELETE */}
                   <form
                     action={async () => {
-                      "use server";
-                      revalidatePath(`/home/profile/${profile.id}`);
-                      await deleteProjectByID(Number(project.project_id));
+                      "use server"
+                      await deleteProjectByID(Number(project.project_id))
+                      revalidatePath(`/home/profile/${profile.id}`)
                     }}
                   >
                     <DropdownMenuItem asChild>
@@ -95,7 +123,6 @@ export default async function ProjectDetailsPage({
             </div>
           )}
         </div>
-
         {/* Project info */}
         <div>
           <h1 className="text-3xl font-bold text-gray-800">{project.title}</h1>
