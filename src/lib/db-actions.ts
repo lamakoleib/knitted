@@ -7,7 +7,7 @@ import { redirect } from "next/navigation"
 import { z } from "zod"
 import { projectSchema } from "@/types/schemas"
 import { FeedPost } from "@/types/feed"
-
+import { cookies } from "next/headers";
 /**
  * Server-side actions for interacting with Supabase.
  *
@@ -1077,4 +1077,78 @@ export async function deleteComment(commentId: number)
     .eq("comment_id", commentId);
 
   if (delErr) throw delErr;
+}
+
+type UpdateAccountInput = 
+{
+  name?: string;
+  birthday?: string;
+};
+
+export async function updateAccountSettings(input: UpdateAccountInput) 
+{
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error: authErr,
+    } = await supabase.auth.getUser();
+
+    if (authErr) return { success: false, message: authErr.message };
+    if (!user) return { success: false, message: "Not authenticated" };
+
+    const updates: Record<string, any> = {
+    };
+    if (typeof input.name !== "undefined") updates.full_name = input.name;
+    if (typeof input.birthday !== "undefined") updates.birthday = input.birthday;
+
+    const { error: upErr } = await supabase
+      .from("Profiles")
+      .update(updates)
+      .eq("id", user.id);
+
+    if (upErr) {
+      console.error("updateAccountSettings supabase error:", upErr);
+      return { success: false, message: upErr.message };
+    }
+
+    revalidatePath("/home");
+    revalidatePath(`/home/profile/${user.id}`);
+
+    return { success: true };
+  } catch (e: any) {
+    console.error("updateAccountSettings unexpected:", e);
+    return { success: false, message: e?.message ?? "Unexpected error" };
+  }
+}
+
+export async function updateAppearanceSettings(input: {
+  theme: "light" | "dark";
+  font: "inter" | "manrope" | "system";
+}) {
+  "use server";
+  try {
+    const supabase = await createClient();
+    const { data: { user }, error: authErr } = await supabase.auth.getUser();
+    if (authErr) throw authErr;
+    if (!user) return { success: false, message: "Not authenticated" };
+
+    await supabase
+      .from("Profiles")
+      .update({
+        theme: input.theme,
+        font: input.font,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", user.id);
+
+    const cookieStore = await cookies();
+    cookieStore.set("theme", input.theme, { path: "/", maxAge: 60 * 60 * 24 * 365 });
+    cookieStore.set("font",  input.font,  { path: "/", maxAge: 60 * 60 * 24 * 365 });
+
+    return { success: true };
+  } catch (e: any) {
+    console.error("updateAppearanceSettings error:", e);
+    return { success: false, message: e?.message ?? "Unexpected error" };
+  }
 }

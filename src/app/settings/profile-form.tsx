@@ -295,7 +295,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
             className="bg-red-300 text-primary-foreground hover:bg-red-300/90" 
             onClick={() => router.back()}
           >
-            ← Go Back
+            ← Back to Profile
           </Button>
           
           <Button
