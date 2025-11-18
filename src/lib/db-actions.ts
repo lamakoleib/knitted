@@ -1154,6 +1154,7 @@ export async function updateAppearanceSettings(input: {
     return { success: false, message: e?.message ?? "Unexpected error" };
   }
 }
+}
 export async function archiveProject(projectId: number) {
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getUser();
