@@ -13,7 +13,7 @@ import { getCurrentUserProfile } from "@/lib/db-actions"
 export default async function SettingsProfilePage() {
   const profile = await getCurrentUserProfile()
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-2xl px-4 sm:px-6 space-y-6">
       <div>
         <h3 className="text-lg font-medium">Profile</h3>
         <p className="text-sm text-muted-foreground">

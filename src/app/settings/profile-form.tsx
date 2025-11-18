@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { Camera, X } from "lucide-react"
-import { useRouter } from "next/navigation"; 
+import { useRouter } from "next/navigation";
 
 
 import { toast } from "@/hooks/use-toast"
@@ -120,7 +120,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
       formData.append("username", data.username)
       formData.append("bio", data.bio)
 
-      if (data.profilePicture) {
+ if (data.profilePicture) {
         formData.append("profilePicture", data.profilePicture)
       }
 
@@ -156,7 +156,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
             control={form.control}
             name="profilePicture"
             render={({ field: { value, onChange, ...fieldProps } }) => (
-              <FormItem className="flex flex-col sm:w-1/4">
+              <FormItem className="flex flex-col w-full sm:w-1/3 md:w-1/4">
                 <FormLabel>Profile Picture</FormLabel>
                 <FormControl>
                   <div className="flex flex-col items-center space-y-3 pt-2">
@@ -260,8 +260,8 @@ export function ProfileForm({ profile }: ProfileFormProps) {
                   <FormDescription>
                     This is your public display name. It can be your real name
                     or a pseudonym. You can only change this once every 30
-                    days.
-                  </FormDescription>
+                    days.                  
+                    </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -289,19 +289,23 @@ export function ProfileForm({ profile }: ProfileFormProps) {
             />
           </div>
         </div>
-        <div className="flex justify-between">
-          <Button 
-            type="button" 
-            className="bg-red-300 text-primary-foreground hover:bg-red-300/90" 
-            onClick={() => router.back()}
+        <div className="flex flex-col-reverse sm:flex-row gap-3 sm:justify-between">
+          <Button
+            type="button"
+            className="w-full sm:w-auto bg-red-300 text-primary-foreground hover:bg-red-300/90"
+            onClick={() => {
+              const id = (profile as any)?.id ?? (profile as any)?.user_id
+              if (id) router.push(`/home/profile/${id}`)
+              else router.back()
+            }}
           >
             ← Back to Profile
           </Button>
-          
+
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="bg-red-300 text-primary-foreground hover:bg-red-300/90"
+            className="w-full sm:w-auto bg-red-300 text-primary-foreground hover:bg-red-300/90"
           >
             {isSubmitting ? "Updating..." : "Update profile"}
           </Button>

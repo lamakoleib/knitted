@@ -181,9 +181,6 @@ export function AppearanceForm(props:
             {form.formState.isSubmitting ? "Saving..." : "Update preferences"}
           </Button>
 
-          <Link href={backHref}>
-            <Button type="button" className="bg-red-300 text-primary-foreground hover:bg-red-300/90">← Back to Profile</Button>
-          </Link>
         </div>
       </form>
     </Form>

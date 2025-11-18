@@ -162,14 +162,6 @@ export function AccountForm({
           >
             {form.formState.isSubmitting ? "Saving..." : "Update account"}
           </Button>
-
-          <Button
-            type="button"
-            className="bg-red-300 text-primary-foreground hover:bg-red-300/90"
-            onClick={() => router.push(`/home/profile/${profileIdForRoute}`)}
-          >
-            ← Back to Profile
-          </Button>
         </div>
       </form>
     </Form>
