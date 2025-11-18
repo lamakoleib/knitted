@@ -9,6 +9,10 @@ export const metadata: Metadata = {
     apple: "/web-app-manifest-192x192.png"
   }
 };
+  applicationName: "Knitted",
+  manifest: "/manifest.webmanifest",
+  themeColor: "#ffffff",
+}
 
 export default function RootLayout({
   children,
@@ -26,6 +30,10 @@ export default function RootLayout({
         <meta name="theme-color" content="#ffffff" />
       </head>
 
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Knitted" />
+        <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+      </head>
       <body className="min-h-screen bg-background text-foreground">
         {children}
       </body>
