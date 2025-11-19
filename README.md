@@ -27,10 +27,13 @@ user-friendly and accessible alternative to existing platforms, allowing users t
 - **Affiliation:** Personal acquaintance requesting a custom social platform for the knitting community. 
 
 ---
-
 ### Techstack
 - Auth/Database: [Supabase](https://supabase.com/)
 - Frontend/Backend: [Nextjs](https://nextjs.org/) 
 - Broker: [PGMQ](https://tembo.io/pgmq/)
 - Deployment: [Vercel](https://vercel.com/)
 - UI Components: [Shadcn](https://ui.shadcn.com/docs)
+
+---
+### Knitted Link
+In order to access our progress web app, refer to this link: https://knitted-dev.netlify.app/login
