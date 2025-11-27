@@ -100,7 +100,6 @@ describe("createClient (Supabase server util)", () => {
       const { createClient } = await import("@/utils/supabase/server");
       await createClient();
 
-      // ---- FIXED PART ----
       const calls = (createServerClient as jest.Mock).mock.calls;
       expect(calls.length).toBeGreaterThan(0);
 
@@ -108,7 +107,6 @@ describe("createClient (Supabase server util)", () => {
       const cookies = options.cookies;
       // --------------------
 
-      // these should not throw even if cookieStore.set throws
       await expect(
         cookies.set("name", "value", { path: "/" } as any)
       ).resolves.toBeUndefined();
