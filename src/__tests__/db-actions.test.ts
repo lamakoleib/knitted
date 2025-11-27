@@ -2,6 +2,8 @@
 import * as dbActions from "@/lib/db-actions"
 import { createClient } from "@/utils/supabase/server"
 import { redirect } from "next/navigation"
+import { revalidatePath } from "next/cache"
+import { cookies } from "next/headers"
 
 jest.mock("@/utils/supabase/server", () => ({
   createClient: jest.fn(),
@@ -13,6 +15,13 @@ jest.mock("@/lib/auth-actions", () => ({
 
 jest.mock("next/navigation", () => ({
   redirect: jest.fn(),
+}))
+jest.mock("next/cache", () => ({
+  revalidatePath: jest.fn(),
+}))
+
+jest.mock("next/headers", () => ({
+  cookies: jest.fn(),
 }))
 
 describe("db-actions", () => {
@@ -635,3 +644,230 @@ describe("Tagging Users Feature", () => {
   });
 });
 })
+  // ============================================
+  // updateAccountSettings
+  // ============================================
+  describe("updateAccountSettings", () => {
+    it("returns auth error when supabase.auth.getUser has error", async () => {
+      const supabase: any = {
+        auth: {
+          getUser: jest.fn().mockResolvedValue({
+            data: { user: null },
+            error: { message: "auth fail" },
+          }),
+        },
+        from: jest.fn(),
+      }
+
+      ;(createClient as jest.Mock).mockResolvedValueOnce(supabase)
+
+      const res = await dbActions.updateAccountSettings({
+        name: "Zey",
+        birthday: "2005-03-15",
+      })
+
+      expect(res).toEqual({ success: false, message: "auth fail" })
+      expect(supabase.from).not.toHaveBeenCalled()
+    })
+
+    it("returns Not authenticated when there is no current user", async () => {
+      const supabase: any = {
+        auth: {
+          getUser: jest.fn().mockResolvedValue({
+            data: { user: null },
+            error: null,
+          }),
+        },
+        from: jest.fn(),
+      }
+
+      ;(createClient as jest.Mock).mockResolvedValueOnce(supabase)
+
+      const res = await dbActions.updateAccountSettings({ name: "Z" })
+
+      expect(res).toEqual({ success: false, message: "Not authenticated" })
+      expect(supabase.from).not.toHaveBeenCalled()
+    })
+
+    it("updates profile and revalidates paths on success", async () => {
+      const eq = jest.fn().mockResolvedValue({ error: null })
+      const update = jest.fn(() => ({ eq }))
+      const from = jest.fn().mockReturnValue({ update })
+
+      const supabase: any = {
+        auth: {
+          getUser: jest.fn().mockResolvedValue({
+            data: { user: { id: "u1" } },
+            error: null,
+          }),
+        },
+        from,
+      }
+
+      ;(createClient as jest.Mock).mockResolvedValueOnce(supabase)
+
+      const res = await dbActions.updateAccountSettings({
+        name: "Zeynep",
+        birthday: "2005-03-15",
+      })
+
+      expect(res).toEqual({ success: true })
+      expect(from).toHaveBeenCalledWith("Profiles")
+      expect(update).toHaveBeenCalledWith({
+        full_name: "Zeynep",
+        birthday: "2005-03-15",
+      })
+      expect(eq).toHaveBeenCalledWith("id", "u1")
+      expect(revalidatePath).toHaveBeenCalledWith("/home")
+      expect(revalidatePath).toHaveBeenCalledWith("/home/profile/u1")
+    })
+
+    it("returns failure when supabase update returns an error", async () => {
+      const eq = jest.fn().mockResolvedValue({
+        error: { message: "db error" },
+      })
+      const update = jest.fn(() => ({ eq }))
+      const from = jest.fn().mockReturnValue({ update })
+
+      const supabase: any = {
+        auth: {
+          getUser: jest.fn().mockResolvedValue({
+            data: { user: { id: "u1" } },
+            error: null,
+          }),
+        },
+        from,
+      }
+
+      ;(createClient as jest.Mock).mockResolvedValueOnce(supabase)
+
+      const res = await dbActions.updateAccountSettings({ name: "Z" })
+
+      expect(res.success).toBe(false)
+      expect(res.message).toBe("db error")
+    })
+
+    it("handles unexpected errors via catch block", async () => {
+      ;(createClient as jest.Mock).mockRejectedValueOnce(
+        new Error("boom error"),
+      )
+
+      const res = await dbActions.updateAccountSettings({ name: "Z" })
+
+      expect(res.success).toBe(false)
+      expect(res.message).toBe("boom error")
+    })
+  })
+  // ============================================
+  // updateAppearanceSettings
+  // ============================================
+  describe("updateAppearanceSettings", () => {
+    const cookiesMock = cookies as unknown as jest.Mock
+
+    beforeEach(() => {
+      cookiesMock.mockReset()
+    })
+
+    it("returns Not authenticated when there is no user", async () => {
+      const supabase: any = {
+        auth: {
+          getUser: jest.fn().mockResolvedValue({
+            data: { user: null },
+            error: null,
+          }),
+        },
+        from: jest.fn(),
+      }
+
+      ;(createClient as jest.Mock).mockResolvedValueOnce(supabase)
+
+      const res = await dbActions.updateAppearanceSettings({
+        theme: "dark",
+        font: "inter",
+      })
+
+      expect(res).toEqual({ success: false, message: "Not authenticated" })
+      expect(supabase.from).not.toHaveBeenCalled()
+      expect(cookiesMock).not.toHaveBeenCalled()
+    })
+
+    it("returns auth error when getUser has error", async () => {
+      const supabase: any = {
+        auth: {
+          getUser: jest.fn().mockResolvedValue({
+            data: { user: null },
+            error: { message: "auth fail" },
+          }),
+        },
+        from: jest.fn(),
+      }
+
+      ;(createClient as jest.Mock).mockResolvedValueOnce(supabase)
+
+      const res = await dbActions.updateAppearanceSettings({
+        theme: "light",
+        font: "system",
+      })
+
+      expect(res.success).toBe(false)
+      expect(res.message).toBe("auth fail")
+    })
+
+    it("updates profile, sets cookies and returns success", async () => {
+      const eq = jest.fn().mockResolvedValue({ error: null })
+      const update = jest.fn(() => ({ eq }))
+      const from = jest.fn().mockReturnValue({ update })
+
+      const supabase: any = {
+        auth: {
+          getUser: jest.fn().mockResolvedValue({
+            data: { user: { id: "u1" } },
+            error: null,
+          }),
+        },
+        from,
+      }
+
+      const set = jest.fn()
+      cookiesMock.mockResolvedValue({ set })
+
+      ;(createClient as jest.Mock).mockResolvedValueOnce(supabase)
+
+      const res = await dbActions.updateAppearanceSettings({
+        theme: "dark",
+        font: "manrope",
+      })
+
+      expect(res).toEqual({ success: true })
+      expect(from).toHaveBeenCalledWith("Profiles")
+      expect(update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          theme: "dark",
+          font: "manrope",
+        }),
+      )
+      expect(eq).toHaveBeenCalledWith("id", "u1")
+
+      // cookies set for theme + font
+      expect(set).toHaveBeenCalledTimes(2)
+      expect(set.mock.calls[0][0]).toBe("theme")
+      expect(set.mock.calls[0][1]).toBe("dark")
+      expect(set.mock.calls[1][0]).toBe("font")
+      expect(set.mock.calls[1][1]).toBe("manrope")
+    })
+
+    it("handles unexpected errors (e.g. createClient rejects)", async () => {
+      ;(createClient as jest.Mock).mockRejectedValueOnce(
+        new Error("unexpected"),
+      )
+
+      const res = await dbActions.updateAppearanceSettings({
+        theme: "light",
+        font: "inter",
+      })
+
+      expect(res.success).toBe(false)
+      expect(res.message).toBe("unexpected")
+    })
+  })
+

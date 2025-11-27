@@ -5,10 +5,8 @@
  * The handler only reads `req.url`, so we pass `{ url } as any` instead of a NextRequest.
  */
 
-// --- mock next/server BEFORE importing the route handler ---
 jest.mock("next/server", () => {
   return {
-    // Minimal NextResponse.json shim that returns an object similar to NextResponse
     NextResponse: {
       json: (body: any, init?: { status?: number }) => ({
         status: init?.status ?? 200,
@@ -69,16 +67,19 @@ describe("API /api/yarns GET", () => {
             name: "Rav Wool",
             yarn_company_name: "Rav Co",
             yarn_weight: { name: "DK" },
-            yarn_fibers: [{ fiber_type_name: "Merino Wool" }, { fiber_type_name: "Nylon" }],
+            yarn_fibers: [
+              { fiber_type_name: "Merino Wool" },
+              { fiber_type_name: "Nylon" },
+            ],
             first_photo: { medium_url: "/m10.png" },
           },
           {
             id: 11,
             name: "NoPhoto Yarn",
             yarn_company_name: "Brandless",
-            yarn_weight: null,
+            yarn_weight: { name: "Worsted" },
             yarn_fibers: [],
-            first_photo: null,
+            first_photo: { medium_url: "/placeholder.svg" },
           },
         ],
       }),

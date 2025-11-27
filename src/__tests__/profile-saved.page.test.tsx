@@ -8,8 +8,7 @@ import { render, screen } from "@testing-library/react";
 jest.mock("next/image", () => ({
   __esModule: true,
   default: (props: any) => {
-    // Only pass the DOM-valid props we care about
-    const { src, alt, ...rest } = props;
+    const { src, alt, fill, priority, ...rest } = props;
     return <img src={src} alt={alt} {...rest} />;
   },
 }));
@@ -133,7 +132,8 @@ describe("db-actions (saved posts logic)", () => {
     });
 
     const order = jest.fn(async () => ({ data: [...projectRowsRef], error: null }));
-    const inFn = jest.fn(() => ({ order }));
+    const isFn = jest.fn(() => ({ order }));
+    const inFn = jest.fn(() => ({ is: isFn }));
     const selectProject = jest.fn(() => ({ in: inFn }));
 
     const from = jest.fn((table: string) => {
@@ -142,7 +142,24 @@ describe("db-actions (saved posts logic)", () => {
       throw new Error(`Unknown table ${table}`);
     });
 
-    return { from, __state: { profileStore, projectRowsRef, spies: { single, eqProfiles, selectProfiles, update, updateEq, order, inFn, selectProject } } };
+    return {
+      from,
+      __state: {
+        profileStore,
+        projectRowsRef,
+        spies: {
+          single,
+          eqProfiles,
+          selectProfiles,
+          update,
+          updateEq,
+          order,
+          inFn,
+          isFn,
+          selectProject,
+        },
+      },
+    };
   }
 
   test("normalizes ids + save/unsave/toggle", async () => {
@@ -236,7 +253,13 @@ describe("db-actions (saved posts logic)", () => {
     }));
 
     const actions = await import("@/lib/db-actions");
-    await expect(actions.savePost(3)).resolves.toEqual({ success: false, error: "User not found" });
-    await expect(actions.unsavePost(1)).resolves.toEqual({ success: false, error: "User not found" });
+    await expect(actions.savePost(3)).resolves.toEqual({
+      success: false,
+      error: "User not found",
+    });
+    await expect(actions.unsavePost(1)).resolves.toEqual({
+      success: false,
+      error: "User not found",
+    });
   });
 });

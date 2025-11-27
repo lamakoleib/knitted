@@ -10,6 +10,7 @@ const chain = () => {
   const q: any = {};
   q.select = jest.fn(() => q);
   q.eq = jest.fn(() => q);
+  q.is = jest.fn(() => q);
   q.order = jest.fn(() => q);
   q.then = undefined;
   q.data = undefined;
@@ -36,7 +37,7 @@ describe("getProjectsByUserID", () => {
         if (t === "Project") return projects;
         if (t === "Comments") {
           // first call -> comments1, second call -> comments2
-          return (supabase.__which++ ? comments2 : comments1);
+          return supabase.__which++ ? comments2 : comments1;
         }
         return chain();
       }),
@@ -49,6 +50,7 @@ describe("getProjectsByUserID", () => {
   it("returns [] when base query errors", async () => {
     projects.select.mockReturnValue(projects);
     projects.eq.mockReturnValue(projects);
+    projects.is.mockReturnValue(projects);
     projects.error = { message: "base error" } as any;
 
     const res = await getProjectsByUserID("u1");
@@ -59,6 +61,7 @@ describe("getProjectsByUserID", () => {
     // base projects OK
     projects.select.mockReturnValue(projects);
     projects.eq.mockReturnValue(projects);
+    projects.is.mockReturnValue(projects);
     projects.data = [
       { project_id: 1, title: "A", images: [] },
       { project_id: 2, title: "B", images: [] },
