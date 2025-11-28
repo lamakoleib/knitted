@@ -33,7 +33,7 @@ function mapPattern(p: any) {
       p.designer?.name ??
       "Unknown designer",
 
-    // you’re not using weight on the frontend from here anymore, so keep it simple
+    
     yarn_weight: p.yarn_weight ?? null,
     yarns_used: p.yarns_used ?? null,
     pattern_categories: p.pattern_categories ?? null,
@@ -61,7 +61,7 @@ export async function GET(req: NextRequest) {
   url.searchParams.set("page_size", page_size)
   if (craft) url.searchParams.set("craft", craft)
 
-  // 👇 ask for first_photo + photos + weights + categories
+  
   url.searchParams.set(
     "additional_fields",
     "pattern_author,first_photo,photos,yarn_weight,yarns_used,pattern_categories",
