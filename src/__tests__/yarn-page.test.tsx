@@ -5,13 +5,11 @@ import React from "react"
 import { render, screen, waitFor, fireEvent } from "@testing-library/react"
 import "@testing-library/jest-dom"
 
-// ---- Mocks for Next & UI bits ----
 jest.mock("next/image", () => (props: any) => <img {...props} />)
 jest.mock("next/link", () => ({ children, href }: any) => (
   <a href={href}>{children}</a>
 ))
 
-// Minimal shadcn/ui mocks
 jest.mock("@/components/ui/button", () => ({
   Button: ({ children, onClick, className }: any) => (
     <button className={className} onClick={onClick} data-testid="button">
@@ -86,7 +84,6 @@ describe("YarnPage (client) /home/yarn", () => {
       expect(global.fetch).toHaveBeenCalledWith("/api/yarns?page_size=24")
     )
 
-    // "Showing 6 results" may appear multiple times; use findAll + assert
     const showing = await screen.findAllByText(
       hasTextContent(/Showing\s+6\s+results/i)
     )
@@ -100,20 +97,26 @@ describe("YarnPage (client) /home/yarn", () => {
         json: async () => ({
           results: [
             {
-              id: 101,
+              id: "101",
               name: "API Yarn One",
-              yarn_company_name: "API Brand",
-              yarn_weight: { name: "Worsted" },
-              yarn_fibers: [{ fiber_type_name: "Wool" }],
-              first_photo: { medium_url: "/img1.png" },
+              brand: "API Brand",
+              image: "/img1.png",
+              weight: "Worsted",
+              fibers: ["Wool"],
+              colors: [],
+              styles: [],
+              price: undefined,
             },
             {
-              id: 202,
+              id: "202",
               name: "API Yarn Two",
-              yarn_company_name: "API Brand2",
-              yarn_weight: { name: "Sport" },
-              yarn_fibers: [{ fiber_type_name: "Cotton" }],
-              first_photo: { medium_url: "/img2.png" },
+              brand: "API Brand2",
+              image: "/img2.png",
+              weight: "Sport",
+              fibers: ["Cotton"],
+              colors: [],
+              styles: [],
+              price: undefined,
             },
           ],
         }),
@@ -158,7 +161,6 @@ describe("YarnPage (client) /home/yarn", () => {
       expect(global.fetch).toHaveBeenCalledWith("/api/yarns?page_size=24")
     )
 
-    // Two "Worsted" checkboxes exist (mobile + desktop). Click the first.
     const worsteds = screen.getAllByLabelText("Worsted") as HTMLInputElement[]
     fireEvent.click(worsteds[0])
 
