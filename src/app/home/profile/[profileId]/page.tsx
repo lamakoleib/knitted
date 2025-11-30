@@ -87,7 +87,7 @@ export default async function Profile({
                 <Follow profileId={profileId} />
               )}
 
-              <Button variant="outline">Message</Button>
+              
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

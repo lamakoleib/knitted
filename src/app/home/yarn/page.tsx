@@ -258,14 +258,7 @@ function Card({ yarn }: { yarn: Yarn }) {
         {yarn.styles.slice(0, 2).join(" • ")}
       </div>
 
-      <div className="mt-3">
-        <Link
-          href={`/home/yarn/${yarn.id}`}
-          className="inline-flex items-center rounded-md border px-3 py-1 text-sm hover:bg-accent"
-        >
-          View details
-        </Link>
-      </div>
+      
     </div>
   )
 }

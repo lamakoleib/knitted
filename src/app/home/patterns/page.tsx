@@ -141,7 +141,7 @@ function PatternCard({ p }: { p: Pattern }) {
 
   return (
     <div className="group relative overflow-hidden rounded-xl border bg-card">
-      <Link href={`/home/patterns/${p.id}`} className="block">
+      <div className="block">
         <div className="aspect-square w-full bg-muted">
           <Image
             src={imgSrc}
@@ -153,7 +153,7 @@ function PatternCard({ p }: { p: Pattern }) {
             unoptimized
           />
         </div>
-      </Link>
+      </div>
 
       <div className="flex items-center justify-between gap-2 p-3">
         <div className="min-w-0">
