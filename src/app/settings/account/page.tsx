@@ -1,6 +1,6 @@
 import { Separator } from "@/components/ui/separator";
 import { AccountForm } from "./account-form";
-import { createClient } from "@/utils/supabase/server";
+import { getCurrentUserProfile } from "@/lib/db-actions";
 
 /**
  * Settings page for updating user account details.
@@ -12,19 +12,8 @@ import { createClient } from "@/utils/supabase/server";
  *
  * @returns The account settings page layout.
  */
-export default async function SettingsAccountPage() 
-{
-	const supabase = await createClient();
-	const {
-		data: { user },
-	} = await supabase.auth.getUser();
-
-	if (!user) return <div>You must be logged in.</div>;
-	const { data: profile } = await supabase
-		.from("Profiles")
-		.select("full_name, birthday")
-		.eq("id", user.id)
-		.single();
+export default async function SettingsAccountPage() {
+	const profile = await getCurrentUserProfile();
 
 	return (
 		<div className="space-y-6">
@@ -36,10 +25,10 @@ export default async function SettingsAccountPage()
 			</div>
 			<Separator />
 			<AccountForm
-				profileIdForRoute={user.id}
+				profileIdForRoute={profile.id}
 				initial={{
-					name: profile?.full_name ?? "",
-					dob: profile?.birthday ? new Date(profile.birthday) : undefined,
+					name: profile.full_name ?? "",
+					dob: profile.birthday ? new Date(profile.birthday) : undefined,
 				}}
 			/>
 		</div>
